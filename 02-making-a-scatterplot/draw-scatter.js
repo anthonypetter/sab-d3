@@ -109,6 +109,63 @@ async function drawScatter() {
     .attr("r", 5)
     .attr("fill", "cornflowerblue");
 
+  /**
+   * EXERCISE IN DATA JOIN:
+   * This function and the calls to it show the utility of the data join. Even
+   * though we attempt to load [0, 200] and [0, 364] D3 maintains efficiency by
+   * only loading the dots that still need to be "entered", which is found
+   * through .enter().
+   */
+  function drawDots(dataset, color) {
+    const dots = bounds.selectAll("circle").data(dataset);
+
+    // Efficient (normal) version using enter().
+    dots.enter().append("circle")
+      .attr("cx", d => xScale(xAccessor(d)))
+      .attr("cy", d => yScale(yAccessor(d)))
+      .attr("r", 5)
+      .attr("fill", color);
+
+    // Alternatively, this version would change all colors on new calls:
+    /*
+    dots.enter().append("circle");
+    bounds.selectAll("circle")
+      .attr("cx", d => xScale(xAccessor(d)))
+      .attr("cy", d => yScale(yAccessor(d)))
+      .attr("r", 5)
+      .attr("fill", color);
+    */
+
+    // This version would merge all dots into entered dots, again, updating everything.
+    /*
+    dots.enter().append("circle")
+      .merge(dots)  // All the dots.
+      .attr("cx", d => xScale(xAccessor(d)))
+      .attr("cy", d => yScale(yAccessor(d)))
+      .attr("r", 5)
+      .attr("fill", color);
+    */
+
+    // This version, using .join(), is the modern short-cut version of the previous two.
+    /*
+    dots.join("circle")
+      .attr("cx", d => xScale(xAccessor(d)))
+      .attr("cy", d => yScale(yAccessor(d)))
+      .attr("r", 5)
+      .attr("fill", color);
+    */
+  }
+
+  function twoDrawsExercise() { // eslint-disable-line no-unused-vars
+    drawDots(dataset.slice(0, 200), "darkgrey");
+    setTimeout(() => {
+      drawDots(dataset, "cornflowerblue");
+    }, 1000);
+  }
+  // twoDrawsExercise();
+
+  // (EXERCISE END)
+
 }
 
 drawScatter();
