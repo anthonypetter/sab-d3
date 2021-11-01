@@ -1,0 +1,14 @@
+{
+  "name": "sab-d3",
+  "version": "0.0.1",
+  "description": "Sabbatical work with D3.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kyle Geib",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.1.0"
+  }
+}
