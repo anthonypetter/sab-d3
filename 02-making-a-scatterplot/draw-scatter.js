@@ -77,12 +77,38 @@ async function drawScatter() {
   // console.log(d3.extent(dataset, yAccessor)); // [0.31, 0.97]
   // console.log(yScale.domain());               // [0.3, 1]
 
-  dataset.forEach(d => {
-    bounds.append("circle")
-      .attr("cx", xScale(xAccessor(d)))
-      .attr("cy", yScale(yAccessor(d)))
-      .attr("r", 5);
-  });
+  /**
+   * While this method of drawing the dots works for now, there are a few issues
+   * we should address.
+   * We're adding a level of nesting, which makes our code harder to follow.
+   * If we run this function twice, we'll end up drawing two sets of dots. When
+   * we start updating our charts, we will want to draw and update our data with
+   * the same code to prevent repeating ourselves.
+   */
+  // dataset.forEach(d => {
+  //   bounds.append("circle")
+  //     .attr("cx", xScale(xAccessor(d)))
+  //     .attr("cy", yScale(yAccessor(d)))
+  //     .attr("r", 5);
+  // });
+
+  /**
+   * Let's do this instead...
+   * When we call .data() on our selection, we're joining our selected elements
+   * with our array of data points. The returned selection will have a list of
+   * existing elements, new elements that need to be added, and old elements
+   * that need to be removed.
+   * Need to be added are listed under _enter. To be removed are under _exit.
+   * To grab those values, use .enter() or .exit().
+   */
+  const dots = bounds.selectAll("circle")
+    .data(dataset)
+    .enter().append("circle")
+    .attr("cx", d => xScale(xAccessor(d)))
+    .attr("cy", d => yScale(yAccessor(d)))
+    .attr("r", 5)
+    .attr("fill", "cornflowerblue");
+
 }
 
 drawScatter();
