@@ -166,6 +166,18 @@ async function drawScatter() {
 
   // (EXERCISE END)
 
+  const xAxisGenerator = d3.axisBottom().scale(xScale);
+  const xAxis = bounds.append("g")
+    .call(xAxisGenerator)
+    .style("transform", `translateY(${dimensions.boundedHeight}px)`);
+
+  const xAxisLabel = xAxis.append("text")
+    .attr("x", dimensions.boundedWidth / 2)
+    .attr("y", dimensions.margin.bottom - 10)
+    .attr("fill", "black")  // Necessary because <g> passes down "none".
+    .style("font-size", "1.4em")
+    .html("Dew point (&deg;F)");
+
 }
 
 drawScatter();
