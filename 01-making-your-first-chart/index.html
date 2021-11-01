@@ -8,6 +8,12 @@
 </head>
 
 <body>
+  <!--
+    The "wrapper" contains the entire chart: the data elements, the axes, the
+    labels, etc. Every SVG element will be contained inside here.
+    The "bounds" contain all of our data elements: in this case, our line.
+    This lets us worry about stuff separately from each other.
+  -->
   <div id="wrapper"></div>
 
   <script src="./../d3.v6.js"></script>

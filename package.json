@@ -4,7 +4,8 @@
   "description": "Sabbatical work with D3.js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "live-server"
   },
   "author": "Kyle Geib",
   "license": "MIT",
