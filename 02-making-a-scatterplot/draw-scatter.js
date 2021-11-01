@@ -62,7 +62,7 @@ async function drawScatter() {
       dimensions.margin.left  // Pushes right
     }px, ${
       dimensions.margin.top   // Pushes down
-    })`);
+    }px)`); // God, don't forget to add px and parens in the right spots!
 
   const xScale = d3.scaleLinear()
     .domain(d3.extent(dataset, xAccessor))
@@ -78,6 +78,7 @@ async function drawScatter() {
   // console.log(yScale.domain());               // [0.3, 1]
 
   /**
+   * BAD STYLE
    * While this method of drawing the dots works for now, there are a few issues
    * we should address.
    * We're adding a level of nesting, which makes our code harder to follow.
@@ -93,6 +94,7 @@ async function drawScatter() {
   // });
 
   /**
+   * GOOD STYLE
    * Let's do this instead...
    * When we call .data() on our selection, we're joining our selected elements
    * with our array of data points. The returned selection will have a list of
@@ -178,6 +180,24 @@ async function drawScatter() {
     .style("font-size", "1.4em")
     .html("Dew point (&deg;F)");
 
+  /**
+   * ticks() is a suggestion. tickValues() lets you define them exactly. d3
+   * attempts to follow your desire but will use nicer values if it thinks it'll
+   * work better.
+   * Docs -> https://github.com/d3/d3-axis#axis_ticks
+   * Source -> https://github.com/d3/d3-array/blob/main/src/ticks.js#L43
+   */
+  const yAxisGenerator = d3.axisLeft().scale(yScale).ticks(4);
+  const yAxis = bounds.append("g").call(yAxisGenerator);
+
+  const yAxisLabel = yAxis.append("text")
+    .attr("x", -dimensions.boundedHeight / 2)
+    .attr("y", -dimensions.margin.left + 10)
+    .attr("fill", "black")
+    .style("font-size", "1.4em")
+    .text("Relative humidity")
+    .style("transform", "rotate(-90deg)")
+    .style("text-anchor", "middle");
 }
 
 drawScatter();
