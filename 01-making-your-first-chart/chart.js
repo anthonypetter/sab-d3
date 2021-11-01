@@ -1,4 +1,5 @@
 async function drawLineChart() {
+  // 1. Access data
   // const dataset = await d3.json("./../my_weather_data.json");  // Corrupt!
   const dataset = await d3.json("./../nyc_weather_data.json");
   console.table(dataset[0]);
@@ -17,6 +18,7 @@ async function drawLineChart() {
 
   console.log(xAccessor(dataset[0]));
 
+  // 2. Create chart dimensions
   let dimensions = {
     width: window.innerWidth * 0.9,
     height: 400,
@@ -30,6 +32,8 @@ async function drawLineChart() {
   dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
   dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
 
+
+  // 3. Draw canvas
   /*
   // Most d3-selection methods will return a selection object.
   const wrapper = d3.select("#wrapper");
@@ -48,12 +52,13 @@ async function drawLineChart() {
 
   // By itself, <g> is 0,0 in size. It expands to the size of its contents.
   const bounds = wrapper.append("g")
-    .style("transform", `translate${
+    .style("transform", `translate(${
       dimensions.margin.left
     }px, ${
       dimensions.margin.top
-    }px`);
+    }px)`);
 
+  // 4. Create scales
   /**
    * We need to scale our temperature variations (which could range from, say,
    * 10F to 100F) and convert them into a pixel range (from say, 0px to 200px).
@@ -81,6 +86,8 @@ async function drawLineChart() {
     .domain(d3.extent(dataset, xAccessor))
     .range([0, dimensions.boundedWidth]);
 
+
+  // 5. Draw data
   /**
    * Example of drawing a shape. "d" attribute will take a few comments that can
    * be capitalized (if giving an absolute value) or lowercased (if giving a
@@ -105,6 +112,25 @@ async function drawLineChart() {
     .attr("fill", "none")
     .attr("stroke", "#af9358")
     .attr("stroke-width", 2);
+
+
+  // 6. Draw peripherals
+  const yAxisGenerator = d3.axisLeft()
+    .scale(yScale);
+
+  // For the sake of organization, put yAxis into its own <g>.
+  const yAxis = bounds.append("g")  // Shorter version
+    .call(yAxisGenerator);  // call() feeds the append's return to the function.
+  // const yAxis = bounds.append("g");  // Longer version
+  // yAxisGenerator(yAxis); // See here, without call you need to do this.
+
+  const xAxisGenerator = d3.axisBottom()
+    .scale(xScale);
+
+  // We need to move the axis down to the bottom of the chart.
+  const xAxis = bounds.append("g")
+    .call(xAxisGenerator)
+    .style("transform", `translateY(${dimensions.boundedHeight}px)`);
 }
 
 drawLineChart();
