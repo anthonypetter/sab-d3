@@ -6,6 +6,8 @@ async function drawScatter() {
   const xAccessor = d => d.dewPoint;
   /** humidity  */
   const yAccessor = d => d.humidity;
+  /** cloudCover color */
+  const colorAccessor = d => d.cloudCover;
 
   /**
    * There is a native browser method (Math.min) that will also find the lowest
@@ -77,6 +79,10 @@ async function drawScatter() {
   // console.log(d3.extent(dataset, yAccessor)); // [0.31, 0.97]
   // console.log(yScale.domain());               // [0.3, 1]
 
+  const colorScale = d3.scaleLinear()
+    .domain(d3.extent(dataset, colorAccessor))
+    .range(["skyblue", "darkslategrey"]);
+
   /**
    * BAD STYLE
    * While this method of drawing the dots works for now, there are a few issues
@@ -109,7 +115,7 @@ async function drawScatter() {
     .attr("cx", d => xScale(xAccessor(d)))
     .attr("cy", d => yScale(yAccessor(d)))
     .attr("r", 5)
-    .attr("fill", "cornflowerblue");
+    .attr("fill", d => colorScale(colorAccessor(d)));
 
   /**
    * EXERCISE IN DATA JOIN:
