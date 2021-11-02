@@ -86,5 +86,16 @@ async function drawBars() {
     ]))
     .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
     .attr("fill", "cornflowerblue");
+
+  // # Adding labels
+  const barText = binGroups.filter(yAccessor) // Filter falsy values (0 length).
+    .append("text")
+    .attr("x", d => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2) // Center
+    .attr("y", d => yScale(yAccessor(d)) - 5) // 5px higher
+    .text(yAccessor)  // The bin length
+    .style("text-anchor", "middle") // Center align text by making anchor in middle.
+    .attr("fill", "darkgrey")
+    .style("font-size", "12px")
+    .style("font-family", "sans-serif");
 }
 drawBars();
