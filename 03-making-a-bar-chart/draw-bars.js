@@ -29,7 +29,12 @@ async function drawBars() {
     const wrapper = d3.select("#wrapper")
       .append("svg")
       .attr("width", dimensions.width)
-      .attr("height", dimensions.height);
+      .attr("height", dimensions.height)
+      .attr("role", "figure") // Accessibility additions
+      .attr("tabindex", "0"); // "0" or "-1" only.
+
+    const title = wrapper.append("title") // Accessibility addition.
+      .text(`Histogram looking at the distribution of ${metric} in one year`);
 
     const bounds = wrapper.append("g")
       .style("transform", `translate(${
@@ -65,12 +70,26 @@ async function drawBars() {
     // # Draw data
     // binsGroup is a <g> to hold all bins.
     const binsGroup = bounds.append("g")
-      .data(bins);
+      .data(bins)
+      .attr("tabindex", "0")  // Accessibility addition.
+      .attr("role", "list")
+      .attr("aria-label", "histogram bars");
 
     // Will create a new <g> for each bin. Each will be given a <g>.
     const binGroups = binsGroup.selectAll("g")  // Only one (we JUST appended it).
       .data(bins)
-      .join("g"); // Join function is like the one for an array to make a string!
+      // .join("g")  // Join function is like the one for an array to make a string!
+      .enter().append("g")  // Accessibility addition.
+      .attr("tabindex", "0")
+      .attr("role", "listitem")
+      .attr("aria-label", d => `There were ${
+        yAccessor(d)
+      } days between ${
+        d.x0.toString().slice(0, 4)
+      } and ${
+        d.x1.toString().slice(0, 4)
+      } ${metric} levels.`);
+
 
     const barPadding = 1;
 
@@ -142,5 +161,11 @@ async function drawBars() {
   ];
 
   metrics.forEach(drawHistogram);
+
+  // Accessibility addition. This silences readers from speaking out plain text.
+  // I suspect you could do stuff like class naming to specify this selectAll().
+  wrapper.selectAll("text")
+    .attr("role", "presentation")
+    .attr("aria-hidden", "true");
 }
 drawBars();
