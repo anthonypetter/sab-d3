@@ -38,7 +38,7 @@ async function drawBars() {
     .style("transform", `translate(${
       dimensions.margin.left
     }px, ${
-      dimensions.margin.right
+      dimensions.margin.top
     }px)`);
 
   // # Create scales
@@ -97,5 +97,23 @@ async function drawBars() {
     .attr("fill", "darkgrey")
     .style("font-size", "12px")
     .style("font-family", "sans-serif");
+
+  // # Extra credit
+  const mean = d3.mean(dataset, metricAccessor);
+  const meanLine = bounds.append("line")
+    .attr("x1", xScale(mean))
+    .attr("y1", -15)
+    .attr("x2", xScale(mean))
+    .attr("y2", dimensions.boundedHeight)
+    .attr("stroke", "maroon")
+    .attr("stroke-dasharray", "2px 4px");
+
+  const meanLabel = bounds.append("text")
+    .attr("x", xScale(mean))
+    .attr("y", -20)
+    .text("mean")
+    .attr("fill", "maroon")
+    .style("text-anchor", "middle")
+    .style("font-size", "12px");
 }
 drawBars();
