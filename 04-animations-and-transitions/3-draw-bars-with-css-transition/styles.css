@@ -1,5 +1,8 @@
 .bin rect {
     fill: cornflowerblue;
+    transition: all 1s ease-out;    /* Everything at once is a little odd */
+    transition: height 1s ease-out, /* Instant new rows, animated bar heights */
+        y 1s ease-out;
 }
 
 .bin text {
@@ -31,8 +34,8 @@ button {
     font-size: 1.2em;
     margin-left: 1em;
     padding: 0.5em 1em;
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     background:darkseagreen;
     color: white;
     border: none;
