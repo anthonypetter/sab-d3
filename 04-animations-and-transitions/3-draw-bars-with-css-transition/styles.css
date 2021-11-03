@@ -17,6 +17,7 @@
 .mean {
     stroke: maroon;
     stroke-dasharray: 2px 4px;
+    transition: transform 1s ease-out;
 }
 
 .x-axis-label {

@@ -103,8 +103,9 @@ async function drawBars() {
     const mean = d3.mean(dataset, metricAccessor);
 
     const meanLine = bounds.selectAll(".mean")
-      .attr("x1", xScale(mean))
-      .attr("x2", xScale(mean))
+      // .attr("x1", xScale(mean))  // Cannot animate with CSS
+      // .attr("x2", xScale(mean))
+      .style("transform", `translateX(${xScale(mean)}px)`)  // Can animate with this
       .attr("y1", -20)
       .attr("y2", dimensions.boundedHeight);
 
