@@ -69,6 +69,10 @@ async function drawBars() {
 
     const barPadding = 1;
 
+    const updateTransition = d3.transition()
+      .ease(d3.easeBounceOut)
+      .duration(600);
+
     let binGroups = bounds.select(".bins")
       .selectAll(".bin")
       .data(bins);
@@ -97,8 +101,7 @@ async function drawBars() {
     binGroups = newBinGroups.merge(binGroups);
 
     const barRects = binGroups.select("rect")
-      .transition().duration(600) // Items below become animated.
-      .ease(d3.easeBounceOut)
+      .transition(updateTransition) // Items below become animated.
       .attr("x", d => xScale(d.x0) + barPadding)
       .attr("y", d => yScale(yAccessor(d)))
       .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
@@ -110,7 +113,7 @@ async function drawBars() {
       .style("fill", "cornflowerblue"); // Becomes blue as it reaches full size.
 
     const barText = binGroups.select("text")
-      .transition().duration(600).ease(d3.easeBounceOut)
+      .transition(updateTransition)
       .attr("x", d => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
       .attr("y", d => yScale(yAccessor(d)) - 5)
       .text(d => yAccessor(d) || "");
@@ -118,6 +121,7 @@ async function drawBars() {
     const mean = d3.mean(dataset, metricAccessor);
 
     const meanLine = bounds.selectAll(".mean")
+      .transition(updateTransition)
       .attr("x1", xScale(mean))
       .attr("x2", xScale(mean))
       .attr("y1", -20)
@@ -129,6 +133,7 @@ async function drawBars() {
       .scale(xScale);
 
     const xAxis = bounds.select(".x-axis")
+      .transition(updateTransition)
       .call(xAxisGenerator);
 
     const xAxisLabel = xAxis.select(".x-axis-label")
