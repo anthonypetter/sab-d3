@@ -33,11 +33,28 @@ async function drawLineChart() {
   const bounds = wrapper.append("g")
     .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`);
 
+  /**
+   * <defs> elements are used by SVG to store any re-usable definitions for later.
+   * SVG can reference the elements kept inside by using their id values.
+   * A clipPath is an element that will only paint inside its children elements.
+   */
+  bounds.append("defs")
+    .append("clipPath")
+      .attr("id", "bounds-clip-path")
+    .append("rect")
+      .attr("width", dimensions.boundedWidth)
+      .attr("height", dimensions.boundedHeight);
+
   // init static elements
   bounds.append("rect")
     .attr("class", "freezing");
-  bounds.append("path")
+
+  // Place this clipPath here because z-index is set at append time.
+  const clip = bounds.append("g")
+    .attr("clip-path", "url(#bounds-clip-path)");
+  clip.append("path") // Path is made a child of clip, not bounds.
     .attr("class", "line");
+
   bounds.append("g")
     .attr("class", "x-axis")
     .style("transform", `translateY(${dimensions.boundedHeight}px)`);
