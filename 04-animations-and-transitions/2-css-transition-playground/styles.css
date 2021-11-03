@@ -2,6 +2,15 @@
     background: cornflowerblue;
     height: 100px;
     width: 100px;
+    transition-duration: 1s;
+    transition-property: transform; /* Only apply to transforms, color is instant */
+    transition: transform 1s;   /* Shorthand of the above two rules */
+    transition: transform 1s steps(6); /* Six stutter-y steps */
+    transition: transform 1s ease-in-out; /* Different styles */
+    /* "Ease-in back overshoots". VSCode auto-completes different animations */
+    transition: transform 1s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+    transition: transform 1s steps(6),
+        background 2s ease-out; /* Transform and background separate. */
 }
 
 .box:hover {
