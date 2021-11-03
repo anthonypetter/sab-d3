@@ -71,7 +71,7 @@ async function drawBars() {
 
     const exitTransition = d3.transition()
       .duration(600);
-    const updateTransition = d3.transition()
+    const updateTransition = exitTransition.transition()
       .ease(d3.easeBounceOut)
       .duration(600);
 
