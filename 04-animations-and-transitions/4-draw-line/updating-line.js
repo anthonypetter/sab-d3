@@ -27,8 +27,8 @@ async function drawLineChart() {
 
   const wrapper = d3.select("#wrapper")
     .append("svg")
-    .attr("width", dimensions.width)
-    .attr("height", dimensions.height);
+      .attr("width", dimensions.width)
+      .attr("height", dimensions.height);
 
   const bounds = wrapper.append("g")
     .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`);
@@ -77,10 +77,10 @@ async function drawLineChart() {
     // This generates the line. Starts with it to the RIGHT. Then animates it
     // returning to its default location over a span of 1 second.
     const line = bounds.select(".line")
-      .attr("d", lineGenerator(dataset))
-      .style("transform", `translateX(${pixelsBetweenLastPoints}px)`)
+        .attr("d", lineGenerator(dataset))
+        .style("transform", `translateX(${pixelsBetweenLastPoints}px)`)
       .transition().duration(1000)
-      .style("transform", "none");
+        .style("transform", "none");
 
     // 6. Draw peripherals
 

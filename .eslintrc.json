@@ -11,7 +11,10 @@
   "rules": {
     "indent": [
       "error",
-      2
+      2,
+      {
+        "MemberExpression": "off"
+      }
     ],
     "linebreak-style": [
       "error",
@@ -35,6 +38,6 @@
     ],
     "import/prefer-default-export": "off",
     "no-undef": "off",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
   }
 }
