@@ -79,20 +79,31 @@ async function drawBars() {
     const newBinGroups = binGroups.enter().append("g")
       .attr("class", "bin");
 
-    newBinGroups.append("rect");
+    newBinGroups.append("rect")
+      .attr("height", 0)  // Initial height value of 0 so it starts small.
+      .attr("x", d => xScale(d.x0) + barPadding)
+      .attr("y", dimensions.boundedHeight)
+      .attr("width", d => d3.max([
+        0,
+        xScale(d.x1) - xScale(d.x0) - barPadding,
+      ]))
+      .style("fill", "yellowgreen");
     newBinGroups.append("text");
 
     // update binGroups to include new points
     binGroups = newBinGroups.merge(binGroups);
 
     const barRects = binGroups.select("rect")
+      .transition().duration(600) // Items below become animated.
       .attr("x", d => xScale(d.x0) + barPadding)
       .attr("y", d => yScale(yAccessor(d)))
       .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
       .attr("width", d => d3.max([
         0,
         xScale(d.x1) - xScale(d.x0) - barPadding
-      ]));
+      ]))
+      .transition() // Items below become animated when previous animations complete.
+      .style("fill", "cornflowerblue"); // Becomes blue as it reaches full size.
 
     const barText = binGroups.select("text")
       .attr("x", d => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
