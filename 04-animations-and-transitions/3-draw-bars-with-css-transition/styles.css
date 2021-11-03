@@ -10,6 +10,8 @@
     fill: darkgrey;
     font-size: 12px;
     font-family: sans-serif;
+    transition: y 1s ease-out;  /* This isn't possible. We'll need to change */
+    transition: transform 1s ease-out;  /* Possible after modification */
 }
 
 .mean {

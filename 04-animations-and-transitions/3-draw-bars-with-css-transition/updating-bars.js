@@ -93,7 +93,11 @@ async function drawBars() {
 
     const barText = binGroups.select("text")
       .attr("x", d => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
-      .attr("y", d => yScale(yAccessor(d)) - 5)
+      // .attr("y", d => yScale(yAccessor(d)) - 5)  // Cannot animate with CSS.
+      .attr("y", 0) // So, set to 0.
+      .style("transform", d => `translateY(${
+        yScale(yAccessor(d)) - 5
+      }px)`)  // y axis for this text is now set by style instead of attr.
       .text(yAccessor);
 
     const mean = d3.mean(dataset, metricAccessor);
