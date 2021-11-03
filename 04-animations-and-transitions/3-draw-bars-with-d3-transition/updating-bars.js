@@ -69,6 +69,8 @@ async function drawBars() {
 
     const barPadding = 1;
 
+    const exitTransition = d3.transition()
+      .duration(600);
     const updateTransition = d3.transition()
       .ease(d3.easeBounceOut)
       .duration(600);
@@ -77,8 +79,22 @@ async function drawBars() {
       .selectAll(".bin")
       .data(bins);
 
+    // Handle removing bins. It's interesting in how it works. Pay close attention
+    // to how we have .exit() and later .remove(). We're doing different things.
     const oldBinGroups = binGroups.exit();
-    oldBinGroups.remove();
+    oldBinGroups.selectAll("rect")
+      .style("fill", "red")
+      .transition(exitTransition)
+      .attr("y", dimensions.boundedHeight) // Moves to the floor.
+      .attr("height", 0); // Shrinks to zero.
+
+    oldBinGroups.selectAll("text")
+      .transition(exitTransition)
+      .attr("y", dimensions.boundedHeight);
+
+    oldBinGroups
+      .transition(exitTransition)
+      .remove();
 
     const newBinGroups = binGroups.enter().append("g")
       .attr("class", "bin");
