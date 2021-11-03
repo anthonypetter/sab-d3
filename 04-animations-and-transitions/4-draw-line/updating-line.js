@@ -57,7 +57,7 @@ async function drawLineChart() {
       .attr("x", 0)
       .attr("width", dimensions.boundedWidth)
       .attr("y", freezingTemperaturePlacement)
-      .attr("height", dimensions.boundedHeight - freezingTemperaturePlacement);
+      .attr("height", d3.max([0, dimensions.boundedHeight - freezingTemperaturePlacement]));
 
     const xScale = d3.scaleTime()
       .domain(d3.extent(dataset, xAccessor))
@@ -69,8 +69,18 @@ async function drawLineChart() {
       .x(d => xScale(xAccessor(d)))
       .y(d => yScale(yAccessor(d)));
 
+    // Shift a moving line
+    const lastTwoPoints = dataset.slice(-2);
+    const pixelsBetweenLastPoints = xScale(xAccessor(lastTwoPoints[1]))
+      - xScale(xAccessor(lastTwoPoints[0]));
+
+    // This generates the line. Starts with it to the RIGHT. Then animates it
+    // returning to its default location over a span of 1 second.
     const line = bounds.select(".line")
-      .attr("d", lineGenerator(dataset));
+      .attr("d", lineGenerator(dataset))
+      .style("transform", `translateX(${pixelsBetweenLastPoints}px)`)
+      .transition().duration(1000)
+      .style("transform", "none");
 
     // 6. Draw peripherals
 
@@ -84,6 +94,7 @@ async function drawLineChart() {
       .scale(xScale);
 
     const xAxis = bounds.select(".x-axis")
+      .transition().duration(1000)
       .call(xAxisGenerator);
   };
   drawLine(dataset);
