@@ -34,12 +34,26 @@ async function createEvent() {
    * in the future.
    */
   rects.on("mouseenter", (e, datum) => {
-    console.log({e, datum});
     d3.select(e.target).style("fill", datum);
   });
   rects.on("mouseout", (e) => {
     d3.select(e.target).style("fill", "lightgrey");
   });
+
+  /**
+   * Destroying d3 event listeners is important. You do them by calling .on()
+   * with the same event name and pass it a null listener function.
+   * It should be noted that it is possible to leave an element stuck in a state
+   * when removing its event listeners. To avoid that you can use .dispatch()
+   * to artificially cause an event that causes it to clear out just before
+   * removing the listeners.
+   */
+  setTimeout(() => {
+    rects
+       .dispatch("mouseout")
+       .on("mouseenter", null)
+       .on("mouseout", null);
+  }, 100000000);
 
 }
 createEvent();
