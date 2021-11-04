@@ -1,4 +1,5 @@
 async function drawLineChart() {
+  const TICK_RATE = 1000;
 
   // 1. Access data
   let dataset = await d3.json("./../../nyc_weather_data.json");
@@ -92,11 +93,11 @@ async function drawLineChart() {
       - xScale(xAccessor(lastTwoPoints[0]));
 
     // This generates the line. Starts with it to the RIGHT. Then animates it
-    // returning to its default location over a span of 1 second.
+    // returning to its default location over a span of 1 tick.
     const line = bounds.select(".line")
         .attr("d", lineGenerator(dataset))
         .style("transform", `translateX(${pixelsBetweenLastPoints}px)`)
-      .transition().duration(1000)
+      .transition().duration(TICK_RATE)
         .style("transform", "none");
 
     // 6. Draw peripherals
@@ -111,13 +112,15 @@ async function drawLineChart() {
       .scale(xScale);
 
     const xAxis = bounds.select(".x-axis")
-      .transition().duration(1000)
+      .transition().duration(TICK_RATE)
       .call(xAxisGenerator);
   };
+
+  // Draw the initial line.
   drawLine(dataset);
 
-  // update the line every 1.5 seconds
-  setInterval(addNewDay, 1500);
+  // update the line on an interval
+  setInterval(addNewDay, TICK_RATE * 1.5);
   function addNewDay() {
     dataset = [
       ...dataset.slice(1),
