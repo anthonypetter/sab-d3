@@ -97,8 +97,16 @@ async function drawBars() {
   const meanLine = bounds.selectAll(".mean")
       .attr("x1", xScale(mean))
       .attr("x2", xScale(mean))
-      .attr("y1", -20)
+      .attr("y1", -15)
       .attr("y2", dimensions.boundedHeight);
+
+  const meanLabel = bounds.append("text")
+    .attr("x", xScale(mean))
+    .attr("y", -20)
+    .text("mean")
+    .attr("fill", "maroon")
+    .style("text-anchor", "middle")
+    .style("font-size", "12px");
 
   // draw axes
   const xAxisGenerator = d3.axisBottom()
@@ -114,6 +122,20 @@ async function drawBars() {
       .text("Humidity");
 
   // 7. Set up interactions
+  /**
+   * We use mouseenter (instead of mouseover) and mouseleave (instead of mouseout)
+   * because we want to only trigger when over the actual element. But leave
+   * on any child elements.
+   */
+  binGroups.select("rect")
+    .on("mouseenter", onMouseEnter)
+    .on("mouseleave", onMouseLeave);
 
+  function onMouseEnter(e, dataum) {
+
+  }
+  function onMouseLeave(e, dataum) {
+
+  }
 }
 drawBars();

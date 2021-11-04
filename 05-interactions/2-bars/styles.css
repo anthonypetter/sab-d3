@@ -5,6 +5,16 @@
     fill: cornflowerblue;
 }
 
+/*
+ * It's easy to recommend that when you're dealing with just basic stylistic
+ * changes that you should stick with CSS rules instead of defining new JS
+ * event listeners. So, the basic rule you can follow is "if you can do it in
+ * CSS, you should do it in CSS".
+ */
+.bin rect:hover {
+    fill: purple;
+}
+
 .bin text {
     text-anchor: middle;
     fill: darkgrey;
@@ -31,7 +41,6 @@ body {
 }
 
 .tooltip {
-    opacity: 0;
     position: absolute;
     top: -12px;
     left: 0;
@@ -44,6 +53,9 @@ body {
     pointer-events: none;
 }
 
+/*
+ * Adding a 12x12 pixel square to the tooltip.
+ */
 .tooltip:before {
     content: '';
     position: absolute;
