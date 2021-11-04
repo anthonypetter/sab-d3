@@ -1,5 +1,6 @@
 async function drawLineChart() {
   const TICK_RATE = 1000;
+  const DAYS = 100; // Desired number of days you want to show at once.
 
   // 1. Access data
   let dataset = await d3.json("./../../nyc_weather_data.json");
@@ -9,7 +10,7 @@ async function drawLineChart() {
   const yAccessor = d => d.temperatureMax;
   const dateParser = d3.timeParse("%Y-%m-%d");
   const xAccessor = d => dateParser(d.date);
-  dataset = dataset.sort((a,b) => xAccessor(a) - xAccessor(b)).slice(0, 100);
+  dataset = dataset.sort((a, b) => xAccessor(a) - xAccessor(b)).slice(0, DAYS + 1);
 
   let dimensions = {
     width: window.innerWidth * 0.9,
@@ -78,7 +79,7 @@ async function drawLineChart() {
       .attr("height", d3.max([0, dimensions.boundedHeight - freezingTemperaturePlacement]));
 
     const xScale = d3.scaleTime()
-      .domain(d3.extent(dataset, xAccessor))
+      .domain(d3.extent(dataset.slice(0, DAYS), xAccessor))
       .range([0, dimensions.boundedWidth]);
 
     // 5. Draw data
@@ -92,13 +93,14 @@ async function drawLineChart() {
     const pixelsBetweenLastPoints = xScale(xAccessor(lastTwoPoints[1]))
       - xScale(xAccessor(lastTwoPoints[0]));
 
-    // This generates the line. Starts with it to the RIGHT. Then animates it
-    // returning to its default location over a span of 1 tick.
+    // This generates the line. Since we have DAYS + 1 of data, it shifts to the
+    // left, hiding the exiting data point, and revealing the +1 point on the right.
     const line = bounds.select(".line")
         .attr("d", lineGenerator(dataset))
-        .style("transform", `translateX(${pixelsBetweenLastPoints}px)`)
+        .style("transform", "none")
       .transition().duration(TICK_RATE)
-        .style("transform", "none");
+        .style("transform", `translateX(${-pixelsBetweenLastPoints}px)`);
+
 
     // 6. Draw peripherals
 
