@@ -28,6 +28,7 @@
       "error",
       "always"
     ],
+    "eol-last": 1,
     "no-bitwise": "off",
     "no-lonely-if": "off",
     "class-methods-use-this": "off",
@@ -38,6 +39,6 @@
     ],
     "import/prefer-default-export": "off",
     "no-undef": "off",
-    "no-unused-vars": "warn",
+    "no-unused-vars": "warn"
   }
 }
