@@ -1,4 +1,11 @@
 .wrapper {
+    /*
+     * Need to set this to relative so our tooltip's absolute positioning will
+     * take its origin to be that of its ancestor - this wrapper - instead of
+     * <html>. If not set, well, CSS sees no ancestors have an opinion, so,
+     * tooltip will position from <html>.
+     */
+    position: relative;
 }
 
 .bin rect {
@@ -41,6 +48,7 @@ body {
 }
 
 .tooltip {
+    opacity: 0;
     position: absolute;
     top: -12px;
     left: 0;

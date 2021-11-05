@@ -131,11 +131,56 @@ async function drawBars() {
     .on("mouseenter", onMouseEnter)
     .on("mouseleave", onMouseLeave);
 
-  function onMouseEnter(e, dataum) {
+  const tooltip = d3.select("#tooltip");
 
+  /**
+   * Remember. It's interesting to consider how d3 is working with datum. It's
+   * kind of a surprise to think about how this datum from the dataset manages
+   * to be associated, reliably, with our <rect> elements within the binGroups
+   * variable.
+   * Additionally, to avoid issues with floating point weirdness we format using:
+   *  -> https://github.com/d3/d3-format
+   */
+  function onMouseEnter(e, datum) {
+    tooltip.select("#count")
+      .text(yAccessor(datum));
+
+    // Prevent overly long decminals.
+    const formatHumidity = d3.format(".2f");
+    tooltip.select("#range")
+      .text([
+        formatHumidity(datum.x0),
+        formatHumidity(datum.x1),
+      ].join(" - "));
+
+    // Calcuate the x position of the tooltip. Need to match
+    const x = xScale(datum.x0)
+      + (xScale(datum.x1) - xScale(datum.x0)) / 2
+      + dimensions.margin.left;
+
+    // Calculate the y position of the tooltip.
+    const y = yScale(yAccessor(datum))
+      + dimensions.margin.top;
+
+    // BAD: This makes the tooltip's top left corner meet the point we want.
+    // tooltip.style("transform", `translate(${x}px, ${y}px)`);
+
+    /**
+     * CSS's calc() function can put together different units. Units such as:
+     * top, right, left, bottom (all based on the parent's height/width)
+     * margin percentage (based on the parent's width)
+     * transform: translate() (based on the element's own size)
+     * So, we can have the element reference and calculate its own dimensions.
+     * (Alternatively, .getBoundingClientRect() could also work, but would be
+     * expensive).
+     */
+    tooltip.style("transform", "translate("
+    + `calc(-50% + ${x}px),`
+    + `calc(-100% + ${y}px)`);
+    tooltip.style("opacity", 1);
   }
-  function onMouseLeave(e, dataum) {
-
+  function onMouseLeave() {
+    tooltip.style("opacity", 0);
   }
 }
 drawBars();
