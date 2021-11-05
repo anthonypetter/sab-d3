@@ -96,6 +96,45 @@ async function drawScatter() {
       .text("relative humidity");
 
   // 7. Set up interactions
+  bounds.selectAll("circle")
+    .on("mouseenter", onMouseEnter)
+    .on("mouseleave", onMouseLeave);
+
+  const tooltip = d3.select("#tooltip");
+
+  function onMouseEnter(e, datum) {
+    const formatHumidity = d3.format(".2f");
+    tooltip.select("#humidity")
+      .text(formatHumidity(yAccessor(datum)));
+
+    const formatDewPoint = d3.format(".2f");
+    tooltip.select("#dew-point")
+      .text(formatDewPoint(xAccessor(datum)));
+
+    const dateParser = d3.timeParse("%Y-%m-%d");
+    /**
+     * %A is full weekday name
+     * %B is full month name
+     * %-d non-padded day of the month (- makes it non-padded)
+     * %Y is full year
+     * Docs here: https://github.com/d3/d3-time-format
+     */
+    const formatDate = d3.timeFormat("%A, %B %-d, %Y");
+    tooltip.select("#date").text(formatDate(dateParser(datum.date)));
+
+    const x = xScale(xAccessor(datum)) + dimensions.margin.left;
+    const y = yScale(yAccessor(datum)) + dimensions.margin.top;
+
+    tooltip.style("transform", "translate("
+      + `calc(${x}px + -50%),`
+      + `calc(${y}px + -100%)`);
+
+    tooltip.style("opacity", 1);
+  }
+
+  function onMouseLeave() {
+    tooltip.style("opacity", 0);
+  }
 
 }
 drawScatter();
