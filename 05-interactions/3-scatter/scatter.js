@@ -67,6 +67,26 @@ async function drawScatter() {
   };
   drawDots(dataset);
 
+  // Adding Voronoi mapping
+  const delaunay = d3.Delaunay.from(
+    dataset,
+    d => xScale(xAccessor(d)),
+    d => yScale(yAccessor(d)),
+  );
+  const voronoi = delaunay.voronoi();
+  // Make sure the map's dimensions match our bounds.
+  voronoi.xmax = dimensions.boundedWidth;
+  voronoi.ymax = dimensions.boundedHeight;
+
+  bounds.selectAll(".voronoi")
+    .data(dataset)
+    .enter().append("path")
+      .attr("class", "voronoi")
+      .attr("d", (d, i) => voronoi.renderCell(i))
+      // .attr("stroke", "salmon")
+      .on("mouseenter", onMouseEnter)
+      .on("mouseleave", onMouseLeave);
+
   // 6. Draw peripherals
 
   const xAxisGenerator = d3.axisBottom()
@@ -96,13 +116,33 @@ async function drawScatter() {
       .text("relative humidity");
 
   // 7. Set up interactions
-  bounds.selectAll("circle")
-    .on("mouseenter", onMouseEnter)
-    .on("mouseleave", onMouseLeave);
+  bounds.selectAll("circle"); // Voronoi mapping means we don't need these triggers.
+  // .on("mouseenter", onMouseEnter)
+  // .on("mouseleave", onMouseLeave);
 
   const tooltip = d3.select("#tooltip");
 
   function onMouseEnter(e, datum) {
+    /**
+     * Naive color change on hover. We'll have the issue where any dots under
+     * another will be obscured.
+     */
+    // bounds.selectAll("circle")
+    //   .filter(d => d == datum)
+    //     .style("fill", "maroon");
+
+    /**
+     * Mature style. We draw a new circle.
+     */
+    const dayDot = bounds.append("circle")
+      .attr("class", "tooltipDot")
+      .attr("cx", xScale(xAccessor(datum)))
+      .attr("cy", yScale(yAccessor(datum)))
+      .attr("r", 7)
+      .style("fill", "maroon")
+      .style("pointer-events", "none");
+
+
     const formatHumidity = d3.format(".2f");
     tooltip.select("#humidity")
       .text(formatHumidity(yAccessor(datum)));
@@ -133,6 +173,7 @@ async function drawScatter() {
   }
 
   function onMouseLeave() {
+    d3.selectAll(".tooltipDot").remove();
     tooltip.style("opacity", 0);
   }
 
