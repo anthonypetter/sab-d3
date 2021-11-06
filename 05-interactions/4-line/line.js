@@ -99,6 +99,36 @@ async function drawLineChart() {
     .call(xAxisGenerator);
 
   // 7. Set up interactions
+  // Adding a mousemove listening rect. Notice that we don't set x,y; they're 0,0.
+  const listeningRect = bounds.append("rect")
+    .attr("class", "listening-rect")
+    .attr("width", dimensions.boundedWidth)
+    .attr("height", dimensions.boundedHeight)
+    .on("mousemove", onMouseMove)
+    .on("mouseleave", onMouseLeave);
+
+  const tooltip = d3.select("#tooltip");
+
+  /**
+   * When you trigger a listening event with .on() d3-selection has a global
+   * d3.event. It refers to the currently triggered event and goes away when the
+   * event is complete. It also means we gain access to d3.pointer(), which
+   * returns the x,y coordinates of the cursor RELATIVE to the specified container.
+   *
+   * Also, random. Remember that uhhh, fat arrow functions don't appear to be
+   * "hoisted", so, if you wanna define after the point its used, you cannot
+   * write it as a const.
+   */
+  function onMouseMove(e) {
+    const mousePosition = d3.pointer(e);
+    /**
+     * Very cool. We can take the x position (a pixel number) and unconvert the
+     * xScale's pixels (range) back into the domain (date values).
+     */
+    const hoveredDate = xScale.invert(mousePosition[0]);
+    console.log(mousePosition, hoveredDate.toString());
+  }
+  function onMouseLeave() { }
 
 }
 drawLineChart();
