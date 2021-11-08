@@ -109,6 +109,12 @@ async function drawLineChart() {
     .on("mouseleave", onMouseLeave);
 
   const tooltip = d3.select("#tooltip");
+  const tooltipCircle = bounds.append("circle")
+    .attr("r", 4)
+    .attr("stroke", "#af9358")
+    .attr("fill", "white")
+    .attr("stoke-width", 2)
+    .style("opacity", 0);
 
   /**
    * When you trigger a listening event with .on() d3-selection has a global
@@ -209,9 +215,15 @@ async function drawLineChart() {
       + `calc( -50% + ${x}px),`
       + `calc(-100% + ${y}px))`);
     tooltip.style("opacity", 1);
+
+    tooltipCircle
+      .attr("cx", xScale(closestXValue))
+      .attr("cy", yScale(closestYValue));
+    tooltipCircle.style("opacity", 1);
   }
   function onMouseLeave() {
     tooltip.style("opacity", 0);
+    tooltipCircle.style("opacity", 0);
   }
 }
 drawLineChart();
