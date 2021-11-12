@@ -1,6 +1,6 @@
 async function drawChart() {
   // load data
-  let dataset = await d3.json("./../../nyc_weather_data.json");
+  let dataset = await d3.json("./../../resources/nyc_weather_data.json");
   const dateParser = d3.timeParse("%Y-%m-%d");
   const dateAccessor = d => dateParser(d.date);
   dataset = dataset.sort((a,b) => dateAccessor(a) - dateAccessor(b)).slice(0, 10);

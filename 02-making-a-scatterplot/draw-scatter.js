@@ -1,5 +1,5 @@
 async function drawScatter() {
-  let dataset = await d3.json("../nyc_weather_data.json");
+  let dataset = await d3.json("../resources/nyc_weather_data.json");
   // console.table(dataset[0]);
 
   /** dewPoint  */

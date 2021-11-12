@@ -3,7 +3,7 @@ async function drawLineChart() {
   const DAYS = 100; // Desired number of days you want to show at once.
 
   // 1. Access data
-  let dataset = await d3.json("./../../nyc_weather_data.json");
+  let dataset = await d3.json("./../../resources/nyc_weather_data.json");
 
   // 2. Create chart dimensions
 
