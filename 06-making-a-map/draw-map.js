@@ -85,5 +85,38 @@ async function drawMap() {
   const earth = bounds.append("path")
     .attr("class", "earth")
     .attr("d", pathGenerator(sphere));
+
+  /**
+   * A graticule is the thin grid we use for latitude and longitude.
+   * d3.geoGraticule10() is for a line every 10 deg.
+   * I think this is a nice little demonstration of how the projection works.
+   * We're feeding it data that is just a bunch of straight lines (36 latitude,
+   * 18 longitude) in a grid pattern. The projector then morphs it through a
+   * transform algorithm.
+   */
+  const graticuleJson = d3.geoGraticule10();
+  const graticule = bounds.append("path")
+    .attr("class", "graticule")
+    .attr("d", pathGenerator(graticuleJson));
+
+  /**
+   * Remember, it may just appear that we're selecting all elements with the
+   * class ".country" when none yet exist, it's just a selector object that
+   * we're priming to bind similar elements.
+   * .join() works like it does for strings. We're putting a new "path" element
+   * for all the things we select.
+   */
+  const countries = bounds.selectAll(".country")
+    .data(countryShapes.features)
+    .join("path")
+      .attr("class", "country")
+      .attr("d", pathGenerator) // Same as `.attr("d", d => pathGenerator(d))`
+      .attr("fill", d => {
+        const metricValue = metricDataByCountry[countryIdAccessor(d)];
+        if (typeof metricValue == "undefined") {
+          return "#e2e6e9";
+        }
+        return colorScale(metricValue);
+      });
 }
 drawMap();
