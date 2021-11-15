@@ -202,6 +202,37 @@ async function drawMap() {
         .transition().duration(500)
         .attr("r", 10);
   });
+
+  // Set up interactions.
+  countries.on("mouseenter", onMouseEnter)
+    .on("mouseLeave", onMouseLeave);
+
+  const tooltip = d3.select("#tooltip");
+
+  function onMouseEnter(e, datum) {
+    tooltip.style("opacity", 1);
+    const metricValue = metricDataByCountry[countryIdAccessor(datum)];
+    tooltip.select("#country")
+      .text(countryNameAccessor(datum));
+
+    tooltip.select("#value")
+      .text(`${d3.format(",.2f")(metricValue || 0)}%`);
+
+    // Get the center of the country...
+    const [centerX, centerY] = pathGenerator.centroid(datum);
+
+    const x = centerX + dimensions.margin.left;
+    const y = centerY + dimensions.margin.top;
+
+    tooltip.style("transform", "translate("
+      + `calc( -50% + ${x}px),`
+      + `calc(-100% + ${y}px))`
+    );
+  }
+
+  function onMouseLeave() {
+    tooltip.style("opacity", 0);
+  }
 }
 drawMap();
 

@@ -100,7 +100,7 @@ circle {
 
 .legend-value {
     fill: #576574;
-    dominant-baseline: middle;
+    dominant-baseline: middle;  /* SVG rule, not CSS. */
     font-size: 0.8em;
 }
 
