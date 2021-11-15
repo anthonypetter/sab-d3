@@ -118,5 +118,74 @@ async function drawMap() {
         }
         return colorScale(metricValue);
       });
+
+  /**
+   * This legendGroup performs some basic responsiveness that seems kinda
+   * naive but effective. If the map is large, the legend is places in the
+   * Pacific ocean west of Central America. Otherwise it's lowered down near
+   * southern Chile.
+   */
+  const legendGroup = wrapper.append("g")
+    .attr("transform", `translate(${
+      120
+    }, ${
+      dimensions.width < 800
+        ? dimensions.boundedHeight - 30
+        : dimensions.boundedHeight * 0.5
+    })`);
+  const legendTitle = legendGroup.append("text")
+    .attr("y", -23)
+    .attr("class", "legend-title")
+    .text("Population Growth");
+  const legendByLine = legendGroup.append("text")
+    .attr("y", -9)
+    .attr("class", "legend-byline")
+    .text("Percent change in 2020");
+
+  // We'll use a gradient elsewhere on the page. So, let's make a defs to store it.
+  const defs = wrapper.append("defs");
+
+  // This Id is used to identify our gradient element.
+  const legendGradientId = "legend-gradient";
+
+  /**
+   * A normal way to define a linearGradient involves defining new <stop>
+   * elements inside a <linearGradient> element. We set the stop color to be
+   * something like <stop stop-color="#12CBC4" offset="0%"></stop>.
+   * For each stop we change the color and increase the offset. Such as 50% and
+   * 100%. This elegent solution below uses a colorScale's range to become the
+   * data we iterate through. We have three colors in the range (which are:
+   * ["indigo", "white", "darkgreen"]) and provide a percentage offset that is
+   * 0 * 100 / 2 (0%); 1 * 100 / 2 (50%), and 2 * 100 / 2 (100%).
+   */
+  const gradient = defs.append("linearGradient")
+      .attr("id", legendGradientId)
+    .selectAll("stop")
+    .data(colorScale.range())
+    .join("stop")
+      .attr("stop-color", d => d)
+      .attr("offset", (d, i) => `${
+        i * 100 / 2 // 2 is one less than our array's length
+      }%`);
+
+  const legendWidth = 120;
+  const legendHeight = 16;
+  const legendGradient = legendGroup.append("rect")
+      .attr("x", -legendWidth / 2)
+      .attr("height", legendHeight)
+      .attr("width", legendWidth)
+      .style("fill", `url(#${legendGradientId})`);
+
+  const legendValueRight = legendGroup.append("text")
+      .attr("class", "legend-value")
+      .attr("x", legendWidth / 2 + 10)
+      .attr("y", legendHeight / 2)
+      .text(`${d3.format(".1f")(maxChange)}%`);
+  const legendValueLeft = legendGroup.append("text")
+      .attr("class", "legend-value")
+      .attr("x", -legendWidth / 2 - 10)
+      .attr("y", legendHeight / 2)
+      .text(`${d3.format(".1f")(-maxChange)}%`)
+      .style("text-anchor", "end"); // Make the text to the left of the start.
 }
 drawMap();
