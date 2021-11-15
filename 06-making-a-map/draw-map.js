@@ -187,5 +187,21 @@ async function drawMap() {
       .attr("y", legendHeight / 2)
       .text(`${d3.format(".1f")(-maxChange)}%`)
       .style("text-anchor", "end"); // Make the text to the left of the start.
+
+  // Get geolocation and show it.
+  navigator.geolocation.getCurrentPosition(myPosition => {
+    const [x, y] = projection([
+      myPosition.coords.longitude,
+      myPosition.coords.latitude,
+    ]);
+    const myLocation = bounds.append("circle")
+        .attr("class", "my-location")
+        .attr("cx", x)
+        .attr("cy", y)
+        .attr("r", 0)
+        .transition().duration(500)
+        .attr("r", 10);
+  });
 }
 drawMap();
+
