@@ -31,38 +31,20 @@ async function drawMap() {
   dimensions.boundedWidth = dimensions.width
     - dimensions.margin.left - dimensions.margin.right;
 
-  /*
-   * Some map projections to consider...
-   * d3.geoMercator() The classic and wonky.
-   * d3.geoTransverseMercator() Good for zoomed-in areas.
-   * d3.geoRobinson() Visually pleasing.
-   * d3.geoEqualEarth() Like Robinson, but equal areas. Author uses this.
-   * d3.geoWinkel3() Poles are weird, but the sizes and shapes are good.
-   * d3.geoOrthographic() It's a picture of a globe.
-   */
-  const sphere = ({ type: "Sphere" });
-  const projection = d3.geoEqualEarth()
-    .fitWidth(dimensions.boundedWidth, sphere);
-  const pathGenerator = d3.geoPath(projection); // Like d3.line() in Ch1.
-  const [[x0, y0], [x1, y1]] = pathGenerator.bounds(sphere);  // Gives us our bounds.
-
-  // Now we can get the boundedHeight, finally!
-  dimensions.boundedHeight = y1;
-  dimensions.height = dimensions.boundedHeight
-    + dimensions.margin.top + dimensions.margin.bottom;
-
   // Draw Canvas
-  const wrapper = d3.select("#wrapper")
-    .append("svg")
-      .attr("width", dimensions.width)
-      .attr("height", dimensions.height);
+  const container = d3.select("#wrapper");
+  const wrapper = container.append("svg")
+      .attr("width", dimensions.width);
 
-  const bounds = wrapper.append("g")
-    .style("transform", `translate(${
-      dimensions.margin.left
-    }px, ${
-      dimensions.margin.top
-    }px)`);
+  const bounds = wrapper.append("g");
+
+  const sphere = ({ type: "Sphere" });
+
+  const defs = bounds.append("defs");
+  defs.append("clipPath")
+      .attr("id", "bounds-clip-path")
+    .append("path")
+      .attr("class", "earth-clip-path");
 
   // Create scales
   const metricValues = Object.values(metricDataByCountry);
@@ -82,88 +64,6 @@ async function drawMap() {
     .domain([-maxChange, 0, maxChange])
     .range(["indigo", "white", "darkgreen"]); // Color blind considerations!
 
-  const earth = bounds.append("path")
-    .attr("class", "earth")
-    .attr("d", pathGenerator(sphere));
-
-  /**
-   * A graticule is the thin grid we use for latitude and longitude.
-   * d3.geoGraticule10() is for a line every 10 deg.
-   * I think this is a nice little demonstration of how the projection works.
-   * We're feeding it data that is just a bunch of straight lines (36 latitude,
-   * 18 longitude) in a grid pattern. The projector then morphs it through a
-   * transform algorithm.
-   */
-  const graticuleJson = d3.geoGraticule10();
-  const graticule = bounds.append("path")
-    .attr("class", "graticule")
-    .attr("d", pathGenerator(graticuleJson));
-
-  /**
-   * Remember, it may just appear that we're selecting all elements with the
-   * class ".country" when none yet exist, it's just a selector object that
-   * we're priming to bind similar elements.
-   * .join() works like it does for strings. We're putting a new "path" element
-   * for all the things we select.
-   */
-  const countries = bounds.selectAll(".country")
-    .data(countryShapes.features)
-    .join("path")
-      .attr("class", "country")
-      .attr("d", pathGenerator) // Same as `.attr("d", d => pathGenerator(d))`
-      .attr("fill", d => {
-        const metricValue = metricDataByCountry[countryIdAccessor(d)];
-        if (typeof metricValue == "undefined") {
-          return "#e2e6e9";
-        }
-        return colorScale(metricValue);
-      });
-
-  // Adding voronoi selection map
-  const delaunay = d3.Delaunay.from(
-    countryShapes.features,
-    d => pathGenerator.centroid(d)[0],
-    d => pathGenerator.centroid(d)[1],
-  );
-  const voronoiPolygons = delaunay.voronoi();
-  voronoiPolygons.xmax = dimensions.boundedWidth;
-  voronoiPolygons.ymax = dimensions.boundedHeight;
-
-  const voronoi = bounds.selectAll(".voronoi")
-    .data(countryShapes.features)
-      .join("path")
-      .attr("class", "voronoi")
-      .attr("stroke", "salmon")
-      .attr("d", (d, i) => voronoiPolygons.renderCell(i));
-
-  /**
-   * This legendGroup performs some basic responsiveness that seems kinda
-   * naive but effective. If the map is large, the legend is places in the
-   * Pacific ocean west of Central America. Otherwise it's lowered down near
-   * southern Chile.
-   */
-  const legendGroup = wrapper.append("g")
-    .attr("transform", `translate(${
-      120
-    }, ${
-      dimensions.width < 800
-        ? dimensions.boundedHeight - 30
-        : dimensions.boundedHeight * 0.5
-    })`);
-  const legendTitle = legendGroup.append("text")
-    .attr("y", -23)
-    .attr("class", "legend-title")
-    .text("Population Growth");
-  const legendByLine = legendGroup.append("text")
-    .attr("y", -9)
-    .attr("class", "legend-byline")
-    .text("Percent change in 2020");
-
-  // We'll use a gradient elsewhere on the page. So, let's make a defs to store it.
-  const defs = wrapper.append("defs");
-
-  // This Id is used to identify our gradient element.
-  const legendGradientId = "legend-gradient";
 
   /**
    * A normal way to define a linearGradient involves defining new <stop>
@@ -176,80 +76,328 @@ async function drawMap() {
    * 0 * 100 / 2 (0%); 1 * 100 / 2 (50%), and 2 * 100 / 2 (100%).
    */
   const gradient = defs.append("linearGradient")
-      .attr("id", legendGradientId)
+    .attr("id", "legend-gradient")
     .selectAll("stop")
     .data(colorScale.range())
     .join("stop")
-      .attr("stop-color", d => d)
-      .attr("offset", (d, i) => `${
-        i * 100 / 2 // 2 is one less than our array's length
-      }%`);
+    .attr("stop-color", d => d)
+    .attr("offset", (d, i) => `${i * 100 / 2}%`); // 2 is one less than our array's length
 
-  const legendWidth = 120;
-  const legendHeight = 16;
-  const legendGradient = legendGroup.append("rect")
-      .attr("x", -legendWidth / 2)
-      .attr("height", legendHeight)
-      .attr("width", legendWidth)
-      .style("fill", `url(#${legendGradientId})`);
+  // Map projection selection section.
+  const builtInProjections = [
+    "geoAzimuthalEqualArea",
+    "geoAzimuthalEquidistant",
+    "geoGnomonic",
+    "geoOrthographic",
+    "geoStereographic",
+    "geoEqualEarth",
+    "geoAlbersUsa",
+    "geoAlbers",
+    "geoConicConformal",
+    "geoConicEqualArea",
+    "geoConicEquidistant",
+    "geoEquirectangular",
+    "geoMercator",
+    "geoTransverseMercator",
+    "geoNaturalEarth1",
+  ];
+  const geoProjectionProjections = [
+    "geoAiry",
+    "geoAitoff",
+    "geoAlbers",
+    "geoArmadillo",
+    "geoAugust",
+    "geoAzimuthalEqualArea",
+    "geoAzimuthalEquidistant",
+    "geoBaker",
+    "geoBerghaus",
+    "geoBertin1953",
+    "geoBoggs",
+    "geoBonne",
+    "geoBottomley",
+    "geoBromley",
+    "geoChamberlin",
+    "geoChamberlinAfrica",
+    "geoCollignon",
+    "geoConicConformal",
+    "geoConicEqualArea",
+    "geoConicEquidistant",
+    "geoCraig",
+    "geoCraster",
+    "geoCylindricalEqualArea",
+    "geoCylindricalStereographic",
+    "geoEckert1",
+    "geoEckert2",
+    "geoEckert3",
+    "geoEckert4",
+    "geoEckert5",
+    "geoEckert6",
+    "geoEisenlohr",
+    "geoEquirectangular",
+    "geoFahey",
+    "geoFoucaut",
+    "geoFoucautSinusoidal",
+    "geoGilbert",
+    "geoGingery",
+    "geoGinzburg4",
+    "geoGinzburg5",
+    "geoGinzburg6",
+    "geoGinzburg8",
+    "geoGinzburg9",
+    "geoGnomonic",
+    "geoGringorten",
+    "geoGuyou",
+    "geoHammer",
+    "geoHammerRetroazimuthal",
+    "geoHealpix",
+    "geoHill",
+    "geoHomolosine",
+    "geoHufnagel",
+    "geoHyperelliptical",
+    "geoKavrayskiy7",
+    "geoLagrange",
+    "geoLarrivee",
+    "geoLaskowski",
+    "geoLittrow",
+    "geoLoximuthal",
+    "geoMercator",
+    "geoMiller",
+    "geoModifiedStereographic",
+    "geoModifiedStereographicAlaska",
+    "geoModifiedStereographicGs48",
+    "geoModifiedStereographicGs50",
+    "geoModifiedStereographicMiller",
+    "geoModifiedStereographicLee",
+    "geoMollweide",
+    "geoMtFlatPolarParabolic",
+    "geoMtFlatPolarQuartic",
+    "geoMtFlatPolarSinusoidal",
+    "geoNaturalEarth1",
+    "geoNaturalEarth2",
+    "geoNellHammer",
+    "geoNicolosi",
+    "geoOrthographic",
+    "geoPatterson",
+    "geoPolyconic",
+    "geoRectangularPolyconic",
+    "geoRobinson",
+    "geoSatellite",
+    "geoSinusoidal",
+    "geoSinuMollweide",
+    "geoStereographic",
+    "geoTimes",
+    "geoTransverseMercator",
+    "geoTwoPointAzimuthal",
+    "geoTwoPointAzimuthalUsa",
+    "geoTwoPointEquidistant",
+    "geoTwoPointEquidistantUsa",
+    "geoVanDerGrinten",
+    "geoVanDerGrinten2",
+    "geoVanDerGrinten3",
+    "geoVanDerGrinten4",
+    "geoWagner",
+    "geoWagner4",
+    "geoWagner6",
+    "geoWagner7",
+    "geoWiechel",
+    "geoWinkel3",
+    "geoInterrupt",
+    "geoInterruptedHomolosine",
+    "geoInterruptedSinusoidal",
+    "geoInterruptedBoggs",
+    "geoInterruptedSinuMollweide",
+    "geoInterruptedMollweide",
+    "geoInterruptedMollweideHemispheres",
+    "geoPolyhedral",
+    "geoPolyhedralButterfly",
+    "geoPolyhedralCollignon",
+    "geoPolyhedralWaterman",
+    "geoQuincuncial",
+    "geoGringortenQuincuncial",
+    "geoPeirceQuincuncial",
+  ];
+  const projections = [
+    ...builtInProjections,
+    // ...geoProjectionProjections,
+  ];
 
-  const legendValueRight = legendGroup.append("text")
-      .attr("class", "legend-value")
-      .attr("x", legendWidth / 2 + 10)
-      .attr("y", legendHeight / 2)
+  const selectedProjection = projections[0];
+  const projectionLabel = d3.select("#name");
+  projectionLabel.text(selectedProjection);
+
+  const select = d3.select("#select");
+  select.selectAll("option")
+    .data(projections)
+    .join("option")
+    .text(d => d)
+    .attr("value", d => d);
+
+  select.on("change", function (d) {
+    projectionLabel.text(this.value);
+    drawMap(this.value);
+  });
+
+  bounds.append("path")
+    .attr("class", "earth");
+
+  bounds.append("path")
+    .attr("class", "graticule");
+
+  /**
+   * Known issues:
+   * - The legend re-draws itself repeatedly when you change the projection.
+   * - myLocation dot, when it works, doesn't disappear between changes.
+   * - geoProjections options do not work. Neither did they in the author's code.
+   * - countries.exit() never happens as it is not a function. Weird.
+   */
+  const drawMap = (projectionName) => {
+    const projection = d3[projectionName]()
+      .fitWidth(dimensions.boundedWidth,
+        sphere);
+
+    const pathGenerator = d3.geoPath(projection);
+    const [[_x0, _y0], [_x1, y1]] = pathGenerator.bounds(sphere);
+
+    dimensions.boundedHeight = y1;
+    dimensions.height = dimensions.boundedHeight
+      + dimensions.margin.top + dimensions.margin.bottom;
+    wrapper.attr("height", dimensions.height);
+
+    bounds.style(
+      "transform",
+      `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`,
+    );
+
+    bounds.select(".earth")
+        .attr("d", pathGenerator(sphere));
+    bounds.select(".earth-clip-path")
+        .attr("d", pathGenerator(sphere));
+
+    const graticule = d3.geoGraticule10();
+    bounds.select(".graticule")
+        .attr("clip-path", "url(#bounds-clip-path")
+        .attr("d", pathGenerator(graticule));
+
+    const countries = bounds.selectAll(".country")
+      .data(countryShapes.features)
+        .join("path")
+        .attr("class", "country")
+        .attr("fill", d => {
+          const metricValue = metricDataByCountry[countryIdAccessor(d)];
+          if (typeof metricValue == "undefined") return "#e2e6e9";
+          return colorScale(metricValue);
+        })
+        .attr("title", d => countryNameAccessor(d))
+        .attr("clip-path", "url(#bounds-clip-path)")
+      .transition().duration(500)
+        .attr("d", d => pathGenerator(d));
+
+    if (countries.exit != null) {
+      countries.exit().remove();
+      console.log("countries.exit().remove()!");
+    }
+
+    // Adding voronoi selection map
+    const delaunay = d3.Delaunay.from(
+      countryShapes.features,
+      d => pathGenerator.centroid(d)[0],
+      d => pathGenerator.centroid(d)[1],
+    );
+    const voronoiPolygons = delaunay.voronoi();
+    voronoiPolygons.xmax = dimensions.boundedWidth;
+    voronoiPolygons.ymax = dimensions.boundedHeight;
+
+    const voronoi = bounds.selectAll(".voronoi")
+      .data(countryShapes.features)
+      .join("path")
+      .attr("class", "voronoi")
+      .attr("stroke", "salmon")
+      .attr("d", (d, i) => voronoiPolygons.renderCell(i));
+
+    const legendGroup = wrapper.append("g")
+      .attr("transform", `translate(${120
+      }, ${dimensions.width < 800
+        ? dimensions.boundedHeight - 30
+        : dimensions.boundedHeight * 0.5
+      })`);
+    const legendTitle = legendGroup.append("text")
+      .attr("y", -23)
+      .attr("class", "legend-title")
+      .text("Population Growth");
+    const legendByLine = legendGroup.append("text")
+      .attr("y", -9)
+      .attr("class", "legend-byline")
+      .text("Percent change in 2020");
+
+    const legendWidth = 120;
+    const legendHeight = 16;
+    const legendGradient = legendGroup.append("rect")
+        .attr("x", -legendWidth / 2)
+        .attr("height", legendHeight)
+        .attr("width", legendWidth)
+      .style("fill", "url(#legend-gradient)");
+
+    const legendValueRight = legendGroup.append("text")
+        .attr("class", "legend-value")
+        .attr("x", legendWidth / 2 + 10)
+        .attr("y", legendHeight / 2)
       .text(`${d3.format(".1f")(maxChange)}%`);
-  const legendValueLeft = legendGroup.append("text")
-      .attr("class", "legend-value")
-      .attr("x", -legendWidth / 2 - 10)
-      .attr("y", legendHeight / 2)
+    const legendValueLeft = legendGroup.append("text")
+        .attr("class", "legend-value")
+        .attr("x", -legendWidth / 2 - 10)
+        .attr("y", legendHeight / 2)
       .text(`${d3.format(".1f")(-maxChange)}%`)
       .style("text-anchor", "end"); // Make the text to the left of the start.
 
-  // Get geolocation and show it.
-  navigator.geolocation.getCurrentPosition(myPosition => {
-    const [x, y] = projection([
-      myPosition.coords.longitude,
-      myPosition.coords.latitude,
-    ]);
-    const myLocation = bounds.append("circle")
-        .attr("class", "my-location")
-        .attr("cx", x)
-        .attr("cy", y)
-        .attr("r", 0)
+    // Get geolocation and show it.
+    navigator.geolocation.getCurrentPosition(myPosition => {
+      const [x, y] = projection([
+        myPosition.coords.longitude,
+        myPosition.coords.latitude,
+      ]);
+      const myLocation = bounds.append("circle")
+          .attr("class", "my-location")
+          .attr("cx", x)
+          .attr("cy", y)
+          .attr("r", 0)
         .transition().duration(500)
-        .attr("r", 10);
-  });
+          .attr("r", 10);
+    });
 
-  // Set up interactions.
-  voronoi.on("mouseenter", onMouseEnter)
-    .on("mouseLeave", onMouseLeave);
+    // Set up interactions.
+    voronoi.on("mouseenter", onMouseEnter)
+      .on("mouseLeave", onMouseLeave);
 
-  const tooltip = d3.select("#tooltip");
+    const tooltip = d3.select("#tooltip");
 
-  function onMouseEnter(e, datum) {
-    tooltip.style("opacity", 1);
-    const metricValue = metricDataByCountry[countryIdAccessor(datum)];
-    tooltip.select("#country")
-      .text(countryNameAccessor(datum));
+    function onMouseEnter(_, datum) {
+      tooltip.style("opacity", 1);
+      const metricValue = metricDataByCountry[countryIdAccessor(datum)];
+      tooltip.select("#country")
+        .text(countryNameAccessor(datum));
 
-    tooltip.select("#value")
-      .text(`${d3.format(",.2f")(metricValue || 0)}%`);
+      tooltip.select("#value")
+        .text(`${d3.format(",.2f")(metricValue || 0)}%`);
 
-    // Get the center of the country...
-    const [centerX, centerY] = pathGenerator.centroid(datum);
+      // Get the center of the country...
+      const [centerX, centerY] = pathGenerator.centroid(datum);
 
-    const x = centerX + dimensions.margin.left;
-    const y = centerY + dimensions.margin.top;
+      const x = centerX + dimensions.margin.left;
+      const y = centerY + dimensions.margin.top;
 
-    tooltip.style("transform", "translate("
-      + `calc( -50% + ${x}px),`
-      + `calc(-100% + ${y}px))`
-    );
-  }
+      tooltip.style("transform", "translate("
+        + `calc( -50% + ${x}px),`
+        + `calc(-100% + ${y}px))`
+      );
+    }
 
-  function onMouseLeave() {
-    tooltip.style("opacity", 0);
-  }
+    function onMouseLeave() {
+      tooltip.style("opacity", 0);
+    }
+  };
+
+  drawMap(selectedProjection);
+
 }
 drawMap();
 

@@ -39,6 +39,9 @@
     ],
     "import/prefer-default-export": "off",
     "no-undef": "off",
-    "no-unused-vars": "warn"
+    "no-unused-vars": [
+      "warn",
+      { "varsIgnorePattern": "^_" }
+    ]
   }
 }
