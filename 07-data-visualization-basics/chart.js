@@ -10,6 +10,7 @@ async function drawLineChart() {
   const xAccessor = d => dateParser(d.date);
   dataset = dataset.sort((a,b) => xAccessor(a) - xAccessor(b));
   const weeks = d3.timeWeeks(xAccessor(dataset[0]), xAccessor(dataset[dataset.length - 1]));
+  const downsampledData = downsampleData(dataset, xAccessor, yAccessor);
 
   // 2. Create chart dimensions
 
@@ -49,16 +50,6 @@ async function drawLineChart() {
     .domain(d3.extent(dataset, xAccessor))
     .range([0, dimensions.boundedWidth]);
 
-  // create grid marks
-  const yAxisGeneratorGridMarks = d3.axisLeft(yScale)
-      .ticks()
-      .tickSize(-dimensions.boundedWidth)
-      .tickFormat("");
-
-  const yAxisGridMarks = bounds.append("g")
-      .attr("class", "y-axis-grid-marks")
-    .call(yAxisGeneratorGridMarks);
-
   // 5. Draw data
 
   const dots = bounds.selectAll(".dot")
@@ -76,14 +67,14 @@ async function drawLineChart() {
 
   const line = bounds.append("path")
       .attr("class", "line")
-      .attr("d", lineGenerator(dataset));
+      .attr("d", lineGenerator(downsampledData));
 
 
   // 6. Draw peripherals
 
   const yAxisGenerator = d3.axisLeft()
     .scale(yScale)
-    .ticks();
+    .ticks(3);
 
   const yAxis = bounds.append("g")
       .attr("class", "y-axis")
