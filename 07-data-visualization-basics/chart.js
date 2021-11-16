@@ -61,18 +61,18 @@ async function drawLineChart() {
 
   // 5. Draw data
 
-  // const dots = bounds.selectAll(".dot")
-  //   .data(dataset)
-  //   .enter().append("circle")
-  //     .attr("cx", d => xScale(xAccessor(d)))
-  //     .attr("cy", d => yScale(yAccessor(d)))
-  //     .attr("r", 2)
-  //     .attr("class", "dot");
+  const dots = bounds.selectAll(".dot")
+    .data(dataset)
+    .enter().append("circle")
+      .attr("cx", d => xScale(xAccessor(d)))
+      .attr("cy", d => yScale(yAccessor(d)))
+      .attr("r", 2)
+      .attr("class", "dot");
 
   const lineGenerator = d3.area()
     .x(d => xScale(xAccessor(d)))
-    .y(d => yScale(yAccessor(d)));
-    // .curve(d3.curveBasis);
+    .y(d => yScale(yAccessor(d)))
+    .curve(d3.curveBasis);
 
   const line = bounds.append("path")
       .attr("class", "line")
