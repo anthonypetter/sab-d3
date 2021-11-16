@@ -119,6 +119,23 @@ async function drawMap() {
         return colorScale(metricValue);
       });
 
+  // Adding voronoi selection map
+  const delaunay = d3.Delaunay.from(
+    countryShapes.features,
+    d => pathGenerator.centroid(d)[0],
+    d => pathGenerator.centroid(d)[1],
+  );
+  const voronoiPolygons = delaunay.voronoi();
+  voronoiPolygons.xmax = dimensions.boundedWidth;
+  voronoiPolygons.ymax = dimensions.boundedHeight;
+
+  const voronoi = bounds.selectAll(".voronoi")
+    .data(countryShapes.features)
+      .join("path")
+      .attr("class", "voronoi")
+      .attr("stroke", "salmon")
+      .attr("d", (d, i) => voronoiPolygons.renderCell(i));
+
   /**
    * This legendGroup performs some basic responsiveness that seems kinda
    * naive but effective. If the map is large, the legend is places in the
@@ -204,7 +221,7 @@ async function drawMap() {
   });
 
   // Set up interactions.
-  countries.on("mouseenter", onMouseEnter)
+  voronoi.on("mouseenter", onMouseEnter)
     .on("mouseLeave", onMouseLeave);
 
   const tooltip = d3.select("#tooltip");
