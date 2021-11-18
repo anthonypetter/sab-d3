@@ -26,6 +26,11 @@ svg {
     text-anchor: middle;
     transform: rotate(-90deg);
 }
+.y-axis-label-suffix {
+    fill: #34495e;
+    text-anchor: start;
+    font-size: 0.8em;
+}
 
 .line {
     fill: none;
@@ -58,8 +63,17 @@ svg {
     font-size: 1.1em;
     fill: #34495e;
     text-anchor: middle;
+    opacity: 20%;
 }
 .season-mean {
     stroke: #8395a7;
     stroke-width: 2px;
+}
+
+.season-mean-label {
+    fill: #34495e;
+    text-anchor: end;
+    dominant-baseline: middle;
+    font-size: 0.8em;
+    opacity: 0.5;
 }

@@ -5,6 +5,7 @@ async function drawLineChart() {
   let dataset = await d3.json("./../resources/nyc_weather_data.json");
 
   const METRIC = "temperatureMax";
+  const METRIC_LABEL = "Max Temperature (°F)";
 
   const yAccessor = d => d[METRIC];
   const dateParser = d3.timeParse("%Y-%m-%d");
@@ -138,11 +139,11 @@ async function drawLineChart() {
       .attr("class", "y-axis")
     .call(yAxisGenerator);
 
-  const yAxisLabel = yAxis.append("text")
-      .attr("y", -dimensions.margin.left + 10)
-      .attr("x", -dimensions.boundedHeight / 2)
-      .attr("class", "y-axis-label")
-      .text(METRIC);
+  const yAxisLabelSuffix = bounds.append("text")
+      .attr("y", seasonOffset - 2)
+      .attr("x", 2)
+      .text(METRIC_LABEL)
+      .attr("class", "y-axis-label-suffix");
 
   const xAxisGenerator = d3.axisBottom()
     .scale(xScale)
@@ -158,7 +159,7 @@ async function drawLineChart() {
     .enter().append("text")
       .filter(d => xScale(d.end) - xScale(d.start) > 60)  // Don't show second winter label.
       .attr("x", d => xScale(d.start) + ((xScale(d.end) - xScale(d.start)) / 2))
-      .attr("y", 2)
+      .attr("y", dimensions.boundedHeight - 5)
       .text(d => d.name)
       .attr("class", "season-label");
 
@@ -170,6 +171,12 @@ async function drawLineChart() {
       .attr("y1", d => yScale(d.mean))
       .attr("y2", d => yScale(d.mean))
       .attr("class", "season-mean");
+
+  const seasonMeanLabel = bounds.append("text")
+      .attr("x", -20)
+      .attr("y", yScale(seasonsData[0].mean))
+      .attr("class", "season-mean-label")
+      .text("Season mean");
 }
 drawLineChart();
 
