@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="./styles.css"></link>
+        <title>My Histogram</title>
+    </head>
+    <body>
+        <div id="heading" class="heading">
+            <h2 id="metric" class="metric"></h2>
+            <div class="legend">
+                <div class="legend-text" id="legend-min"></div>
+                <div class="legend-gradient" id="legend-gradient"></div>
+                <div class="legend-text" id="legend-max"></div>
+            </div>
+        </div>
+
+        <div id="wrapper" class="wrapper"></div>
+
+        <script src="./../../node_modules/d3/dist/d3.js"></script>
+        <script src="./chart.js"></script>
+    </body>
+
+</html>
