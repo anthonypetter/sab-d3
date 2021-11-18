@@ -150,6 +150,15 @@ async function drawLineChart() {
       .attr("class", "x-axis")
       .style("transform", `translateY(${dimensions.boundedHeight}px)`)
     .call(xAxisGenerator);
+
+  const seasonLabels = bounds.selectAll("season-label")
+      .data(seasonsData)
+    .enter().append("text")
+      .filter(d => xScale(d.end) - xScale(d.start) > 60)  // Don't show second winter label.
+      .attr("x", d => xScale(d.start) + ((xScale(d.end) - xScale(d.start)) / 2))
+      .attr("y", 2)
+      .text(d => d.name)
+      .attr("class", "season-label");
 }
 drawLineChart();
 
