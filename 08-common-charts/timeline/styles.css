@@ -21,6 +21,10 @@ body {
     stroke-width: 2;
 }
 
+.dot {
+    fill: #34495e;
+}
+
 .y-axis-label {
     fill: #34495e;
     font-size: 1.4em;

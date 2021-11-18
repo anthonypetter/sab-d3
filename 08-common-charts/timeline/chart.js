@@ -57,11 +57,20 @@ async function drawLineChart() {
 
   const lineGenerator = d3.line()
     .x(d => xScale(xAccessor(d)))
-    .y(d => yScale(yAccessor(d)));
+    .y(d => yScale(yAccessor(d)))
+    .curve(d3.curveMonotoneX);
 
   const line = clip.append("path")
       .attr("class", "line")
       .attr("d", lineGenerator(dataset));
+
+  const dots = clip.selectAll(".dot")
+    .data(dataset)
+    .enter().append("circle")
+      .attr("cx", d => xScale(xAccessor(d)))
+      .attr("cy", d => yScale(yAccessor(d)))
+      .attr("r", 2)
+      .attr("class", "dot");
 
   // 6. Draw peripherals
 
