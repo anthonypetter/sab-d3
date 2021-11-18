@@ -59,3 +59,7 @@ svg {
     fill: #34495e;
     text-anchor: middle;
 }
+.season-mean {
+    stroke: #8395a7;
+    stroke-width: 2px;
+}

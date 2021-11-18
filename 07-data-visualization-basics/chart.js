@@ -4,13 +4,15 @@ async function drawLineChart() {
 
   let dataset = await d3.json("./../resources/nyc_weather_data.json");
 
-  const yAccessor = d => d.humidity;
+  const METRIC = "temperatureMax";
+
+  const yAccessor = d => d[METRIC];
   const dateParser = d3.timeParse("%Y-%m-%d");
   const dateFormatter = d3.timeFormat("%Y-%m-%d");
   const xAccessor = d => dateParser(d.date);
   dataset = dataset.sort((a,b) => xAccessor(a) - xAccessor(b));
   const weeks = d3.timeWeeks(xAccessor(dataset[0]), xAccessor(dataset[dataset.length - 1]));
-  const downsampledData = downsampleData(dataset, xAccessor, yAccessor);
+  const downsampledData = downsampleData(dataset, xAccessor, yAccessor, METRIC);
 
   // 2. Create chart dimensions
 
@@ -140,7 +142,7 @@ async function drawLineChart() {
       .attr("y", -dimensions.margin.left + 10)
       .attr("x", -dimensions.boundedHeight / 2)
       .attr("class", "y-axis-label")
-      .text("relative humidity");
+      .text(METRIC);
 
   const xAxisGenerator = d3.axisBottom()
     .scale(xScale)
@@ -159,11 +161,20 @@ async function drawLineChart() {
       .attr("y", 2)
       .text(d => d.name)
       .attr("class", "season-label");
+
+  const seasonMeans = bounds.selectAll("season-mean")
+      .data(seasonsData)
+    .enter().append("line")
+      .attr("x1", d => xScale(d.start))
+      .attr("x2", d => xScale(d.end))
+      .attr("y1", d => yScale(d.mean))
+      .attr("y2", d => yScale(d.mean))
+      .attr("class", "season-mean");
 }
 drawLineChart();
 
 
-function downsampleData(data, xAccessor, yAccessor) {
+function downsampleData(data, xAccessor, yAccessor, metric) {
   const weeks = d3.timeWeeks(xAccessor(data[0]), xAccessor(data[data.length - 1]));
 
   return weeks.map((week, index) => {
@@ -171,7 +182,7 @@ function downsampleData(data, xAccessor, yAccessor) {
     const days = data.filter(d => xAccessor(d) > week && xAccessor(d) <= weekEnd);
     return {
       date: d3.timeFormat("%Y-%m-%d")(week),
-      humidity: d3.mean(days, yAccessor),
+      [metric]: d3.mean(days, yAccessor),
     };
   });
 }
