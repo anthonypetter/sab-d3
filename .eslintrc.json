@@ -42,6 +42,10 @@
     "no-unused-vars": [
       "warn",
       { "varsIgnorePattern": "^_" }
+    ],
+    "comma-dangle": [
+      "error",
+      "always-multiline"
     ]
   }
 }
