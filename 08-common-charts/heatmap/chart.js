@@ -6,12 +6,35 @@ async function drawScatter() {
 
   const parseDate = d3.timeParse("%Y-%m-%d");
   const dateAccessor = d => parseDate(d.date);
-  dataset = dataset.sort((a,b) => dateAccessor(a) - dateAccessor(b));
+  dataset = dataset.sort((a, b) => dateAccessor(a) - dateAccessor(b));
+  const dayOfWeekFormat = d3.timeFormat("%-w");
+
+  // dataset = dataset.slice(6, 365); // Simulate Sunday starting calendar.
 
   const firstDate = dateAccessor(dataset[0]);
-  const weekFormat = d3.timeFormat("%-e");
-  const xAccessor = d => d3.timeWeeks(firstDate, dateAccessor(d)).length;
-  const dayOfWeekFormat = d3.timeFormat("%-w");
+
+  /**
+   * Give the week number of the date.
+   * Because d3.timeWeeks() uses ISO-8601 standard definition of Monday being
+   * the start of the week we need to check to see if the date is a Sunday, in
+   * which case, we need to shift the Sunday row one slot to the right (+1).
+   * If our heatmap calendar starts on a Sunday we need to shift to the left
+   * (-1) to cancel out the shift or else there'll be an empty first column.
+   * @param {*} d datum
+   * @returns Week number
+   */
+  const xAccessor = d => {
+    const date = dateAccessor(d);
+    const shift = (+dayOfWeekFormat(date) === 0 ? 1 : 0)
+      + (+dayOfWeekFormat(firstDate) === 0 ? -1 : 0);
+    return d3.timeWeeks(firstDate, date).length + shift;
+  };
+
+  /**
+   * Gives the week day number of the date. 0 = Sunday, 6 = Saturday.
+   * @param {*} d datum
+   * @returns
+   */
   const yAccessor = d => +dayOfWeekFormat(dateAccessor(d));
 
 
@@ -146,7 +169,7 @@ async function drawScatter() {
   }
 
   const tooltip = d3.select("#tooltip");
-  const formatDate = d3.timeFormat("%b %-d");
+  const formatDate = d3.timeFormat("%b %-d, %Y");
 
   function onMouseEnter(_, datum) {
     tooltip.style("opacity", 1);
@@ -169,7 +192,6 @@ async function drawScatter() {
     );
   }
   function onMouseLeave() {
-    console.log("Leave");
     tooltip.style("opacity", 0);
   }
 }
