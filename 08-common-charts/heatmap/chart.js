@@ -26,10 +26,15 @@ async function drawScatter() {
       left: 80,
     },
   };
-  dimensions.width = (window.innerWidth - dimensions.margin.left - dimensions.margin.right) * 0.95;
-  dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
-  dimensions.height = dimensions.boundedWidth * 7 / numberOfWeeks + dimensions.margin.top + dimensions.margin.bottom;
-  dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
+  dimensions.width = (
+    window.innerWidth - dimensions.margin.left - dimensions.margin.right
+  ) * 0.95;
+  dimensions.boundedWidth = dimensions.width
+    - dimensions.margin.left - dimensions.margin.right;
+  dimensions.height = dimensions.boundedWidth * 7 / numberOfWeeks
+    + dimensions.margin.top + dimensions.margin.bottom;
+  dimensions.boundedHeight = dimensions.height
+    - dimensions.margin.top - dimensions.margin.bottom;
 
   // 3. Draw canvas
 
@@ -39,11 +44,14 @@ async function drawScatter() {
       .attr("height", dimensions.height);
 
   const bounds = wrapper.append("g")
-    .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`);
+    .style(
+      "transform",
+      `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`,
+    );
 
   // 4. Create scales
 
-  const barPadding = 0;
+  const barPadding = 1;
   const totalBarDimension = d3.min([
     dimensions.boundedWidth / numberOfWeeks,
     dimensions.boundedHeight / 7,
@@ -57,7 +65,9 @@ async function drawScatter() {
     .data(d3.timeMonths(dateAccessor(dataset[0]), dateAccessor(dataset[dataset.length - 1])))
     .join("text")
       .attr("class", "month")
-      .attr("transform", d => `translate(${totalBarDimension * d3.timeWeeks(firstDate, d).length}, -10)`)
+      .attr("transform", d =>
+        `translate(${totalBarDimension * d3.timeWeeks(firstDate, d).length}, -10)`,
+      )
       .text(d => monthFormat(d));
 
   const dayOfWeekParse = d3.timeParse("%-e");
@@ -103,7 +113,9 @@ async function drawScatter() {
         .attr("width", barDimension)
         .attr("y", d => totalBarDimension * yAccessor(d))
         .attr("height", barDimension)
-        .style("fill", d => colorScale(colorAccessor(d)));
+        .style("fill", d => colorScale(colorAccessor(d)))
+      .on("mouseenter", onMouseEnter)
+      .on("mouseleave", onMouseLeave);
 
     const oldDots = days.exit()
         .remove();
@@ -119,6 +131,7 @@ async function drawScatter() {
     "temperatureMin",
     "temperatureMax",
   ];
+
   let selectedMetricIndex = 0;
   drawDays(metrics[selectedMetricIndex]);
 
@@ -130,6 +143,39 @@ async function drawScatter() {
   function onClick() {
     selectedMetricIndex = (selectedMetricIndex + 1) % metrics.length;
     drawDays(metrics[selectedMetricIndex]);
+  }
+
+  const tooltip = d3.select("#tooltip");
+  const formatDate = d3.timeFormat("%b %-d");
+
+  function onMouseEnter(_, datum) {
+    tooltip.style("opacity", 1);
+    const value = datum[metrics[selectedMetricIndex]];
+    const dateString = formatDate(dateAccessor(datum));
+
+    tooltip.select("#date")
+      .text(dateString);
+    tooltip.select("#value")
+      .text(value);
+
+    const x = 0
+      + (totalBarDimension * xAccessor(datum)); //+ totalBarDimension / 2;
+    const y = 0
+      + (totalBarDimension * yAccessor(datum)); //+ totalBarDimension / 2;
+
+    // tooltip.style("transform", "translate("
+    //   + `calc( -50% + ${x}px),`
+    //   + `calc(-100% + ${y}px))`,
+    // );
+    tooltip.style("transform", "translate("
+      + `${x}px,`
+      + `${y}px)`,
+    );
+
+  }
+  function onMouseLeave() {
+    console.log("Leave");
+    tooltip.style("opacity", 0);
   }
 }
 drawScatter();
