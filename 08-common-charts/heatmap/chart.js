@@ -73,7 +73,7 @@ async function drawScatter() {
   const dayOfWeekParse = d3.timeParse("%-e");
   const dayOfWeekTickFormat = d3.timeFormat("%-A");
   const labels = bounds.selectAll(".label")
-    .data(new Array(7).fill(null).map((d,i) => i))
+    .data(new Array(7).fill(null).map((_,i) => i))
     .join("text")
       .attr("class", "label")
       .attr("transform", d => `translate(-10, ${totalBarDimension * (d + 0.5)})`)
@@ -117,7 +117,7 @@ async function drawScatter() {
       .on("mouseenter", onMouseEnter)
       .on("mouseleave", onMouseLeave);
 
-    const oldDots = days.exit()
+    const oldDays = days.exit()
         .remove();
   };
 
@@ -158,20 +158,15 @@ async function drawScatter() {
     tooltip.select("#value")
       .text(value);
 
-    const x = 0
-      + (totalBarDimension * xAccessor(datum)); //+ totalBarDimension / 2;
-    const y = 0
-      + (totalBarDimension * yAccessor(datum)); //+ totalBarDimension / 2;
+    const x = dimensions.margin.left
+      + (totalBarDimension * xAccessor(datum)) + totalBarDimension / 2;
+    const y = dimensions.margin.top
+      + (totalBarDimension * yAccessor(datum)) + totalBarDimension / 2;
 
-    // tooltip.style("transform", "translate("
-    //   + `calc( -50% + ${x}px),`
-    //   + `calc(-100% + ${y}px))`,
-    // );
     tooltip.style("transform", "translate("
-      + `${x}px,`
-      + `${y}px)`,
+      + `calc( -50% + ${x}px),`
+      + `calc(-100% + ${y}px))`,
     );
-
   }
   function onMouseLeave() {
     console.log("Leave");

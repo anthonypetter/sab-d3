@@ -19,6 +19,10 @@ svg {
     shape-rendering: crispedges;
 }
 
+.wrapper {
+    position: relative;
+}
+
 .day {
     transition: fill 0.3s ease-out;
 }
