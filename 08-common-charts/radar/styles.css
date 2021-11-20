@@ -28,6 +28,11 @@ body {
     font-feature-settings: 'tnum' 1;
 }
 
+.dot,
+.line {
+    transition: all 0.3s ease-out;
+}
+
 .line {
     fill: none;
     stroke: cornflowerblue;
@@ -37,12 +42,11 @@ body {
 }
 
 .dot {
-    fill: #8395a7;
+    fill: cornflowerblue;
 }
-
-.dot,
-.line {
-    transition: all 0.3s ease-out;
+.dot:hover {
+    fill: #18da68;
+    transition: fill 0.6s ease;
 }
 
 .grid-line {

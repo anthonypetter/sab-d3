@@ -162,20 +162,47 @@ async function drawBars() {
           `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
         );
 
-    // Necessary to detect and update on day changes but still still have metrics.
-    const daysData = metrics.map((metric, i) => metricScales[i](+day[metric] || 0));
+    // Necessary to detect and update on day changes but still have metrics.
+    const daysData = metrics.map((metric, i) => {
+      const angle = i * ((Math.PI * 2) / metrics.length) - Math.PI * 0.5;
+      const radius = metricScales[i](+day[metric] || 0);
+      return {
+        metric,
+        value: +day[metric] || 0,
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+      };
+    });
     const dots = bounds.selectAll(".dot")
       .data(daysData)
       .join("circle")
-        .attr("cx", (dayData, i) =>
-          Math.cos(i * ((Math.PI * 2) / metrics.length) - Math.PI * 0.5) * dayData)
-        .attr("cy", (dayData, i) =>
-          Math.sin(i * ((Math.PI * 2) / metrics.length) - Math.PI * 0.5) * dayData)
-        .attr("r", 3)
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 4)
         .attr("class", "dot")
         .style("transform",
           `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-        );
+        )
+        .on("mouseenter", onMouseEnter)
+        .on("mouseleave", onMouseLeave);
+  };
+
+  // Set up interactions.
+  const tooltip = d3.select("#tooltip");
+
+  const onMouseEnter = (_, datum) => {
+    tooltip.style("transform", "translate("
+      + `calc(${datum.x}px + -50% + ${dimensions.margin.left + dimensions.boundedRadius}px),`
+      + `calc(${datum.y}px + -100% + ${dimensions.margin.top + dimensions.boundedRadius}px))`,
+    )
+    .style("opacity", 1);
+
+    tooltip.select("#metric-name").text(datum.metric);
+    tooltip.select("#value").text(d3.format(".2f")(datum.value));
+
+  };
+  const onMouseLeave = () => {
+    tooltip.style("opacity", 0);
   };
 
   let activeDayIndex = 0;
