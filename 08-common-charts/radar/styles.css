@@ -13,6 +13,10 @@ body {
     font-size: 16px;
 }
 
+.wrapper {
+    position: relative;
+}
+
 .title {
     position: relative;
     width: 600px;
@@ -30,6 +34,14 @@ body {
     stroke-width: 2;
     fill: cornflowerblue;
     fill-opacity: 0.1;
+}
+
+.dot {
+    fill: #8395a7;
+}
+
+.dot,
+.line {
     transition: all 0.3s ease-out;
 }
 
@@ -76,4 +88,41 @@ button:focus:active,
 button:active {
     box-shadow: 0 1px 0 0 seagreen;
     transform: translateY(4px);
+}
+
+.tooltip {
+    opacity: 0;
+    position: absolute;
+    top: -12px;
+    left: 0;
+    padding: 0.6em 1em;
+    background: #fff;
+    text-align: center;
+    border: 1px solid #ddd;
+    z-index: 10;
+    transition: all 0.2s ease-out;
+    pointer-events: none;
+}
+
+.tooltip:before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 1px solid #ddd;
+    border-top-color: transparent;
+    border-left-color: transparent;
+    transform: translate(-50%, 50%) rotate(45deg);
+    transform-origin: center center;
+    z-index: 10;
+}
+
+.tooltip-data {
+    margin-bottom: 0.2em;
+    font-weight: 900;
+    font-size: 0.8em;
+    line-height: 1.4em;
 }

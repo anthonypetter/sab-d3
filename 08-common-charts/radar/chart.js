@@ -161,6 +161,21 @@ async function drawBars() {
         .style("transform", // Place the line in the center of the chart.
           `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
         );
+
+    // Necessary to detect and update on day changes but still still have metrics.
+    const daysData = metrics.map((metric, i) => metricScales[i](+day[metric] || 0));
+    const dots = bounds.selectAll(".dot")
+      .data(daysData)
+      .join("circle")
+        .attr("cx", (dayData, i) =>
+          Math.cos(i * ((Math.PI * 2) / metrics.length) - Math.PI * 0.5) * dayData)
+        .attr("cy", (dayData, i) =>
+          Math.sin(i * ((Math.PI * 2) / metrics.length) - Math.PI * 0.5) * dayData)
+        .attr("r", 3)
+        .attr("class", "dot")
+        .style("transform",
+          `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+        );
   };
 
   let activeDayIndex = 0;
