@@ -173,7 +173,19 @@ async function drawBars() {
         y: Math.sin(angle) * radius,
       };
     });
-    const dots = bounds.selectAll(".dot")
+    const activationDots = bounds.selectAll(".dot-activation")
+      .data(daysData)
+      .join("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 15)
+        .attr("class", "dot-activation")
+        .style("transform",
+          `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+        )
+        .on("mouseenter", onMouseEnter)
+        .on("mouseleave", onMouseLeave);
+    bounds.selectAll(".dot")
       .data(daysData)
       .join("circle")
         .attr("cx", d => d.x)
@@ -182,9 +194,7 @@ async function drawBars() {
         .attr("class", "dot")
         .style("transform",
           `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-        )
-        .on("mouseenter", onMouseEnter)
-        .on("mouseleave", onMouseLeave);
+        );
   };
 
   // Set up interactions.
