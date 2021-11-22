@@ -61,7 +61,7 @@ async function drawBars() {
   // 6. Draw peripherals
   // We're drawing our axes early here so they don't overlap our radar line
 
-  const axis = bounds.append("g");
+  const axis = bounds.append("g").attr("class", "web");
 
   const gridCircles = d3.range(GRID_TICKS + 1).map((_, i) => (
     axis.append("circle")
@@ -173,21 +173,81 @@ async function drawBars() {
         y: Math.sin(angle) * radius,
       };
     });
-    const activationDots = bounds.selectAll(".dot-activation")
+
+    // // const dots = dotGroup.selectAll(".dot-activation").data(daysData);
+    // const dots = dotGroup.selectAll(".dot-activation")
+    // .join("circle")
+    //     .attr("cx", d => d.x)
+    //     .attr("cy", d => d.y)
+    //     .attr("r", 15)
+    //     .attr("class", "dot-activation")
+    //     .style("transform",
+    //       `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+    //     );
+
+
+
+
+    // const activationDots = bounds.selectAll(".dot-activation")
+    //   .data(daysData)
+    //   .enter();
+    // activationDots.append("circle")
+    //     .attr("cx", d => d.x)
+    //     .attr("cy", d => d.y)
+    //     .attr("r", 15)
+    //     .attr("class", "dot-activation")
+    //     .style("transform",
+    //       `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+    //     )
+    //     .on("mouseenter", onMouseEnter)
+    //     .on("mouseleave", onMouseLeave);
+    // activationDots.insert("circle")
+    //     .attr("cx", d => d.x)
+    //     .attr("cy", d => d.y)
+    //     .attr("r", 4)
+    //     .attr("class", "dot")
+    //     .style("transform",
+    //       `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+    //     );
+
+    // activationDots.exit().remove();
+
+    // const combinedDot = d3.select().append("circle")
+    //   .attr("cx", d => d.x)
+    //   .attr("cy", d => d.y)
+    //   .attr("r", 15)
+    //   .attr("class", "dot-activation")
+    //   .style("transform",
+    //     `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+    //   ).insert("circle")
+    //   .attr("cx", d => d.x)
+    //   .attr("cy", d => d.y)
+    //   .attr("r", 4)
+    //   .attr("class", "dot")
+    //   .style("transform",
+    //     `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+    //   );
+
+    const dotGroupsContainer = bounds.append("g")
+      .attr("class", "dot-groups-container");
+    const dotGroups = dotGroupsContainer.selectAll(".dot-groups")
       .data(daysData)
-      .join("circle")
+      .join("g")
+      .attr("class", "dot-group")
+      .on("mouseenter", onMouseEnter)
+      .on("mouseleave", onMouseLeave);
+
+    // dotGroups.exit().remove();
+
+    const activationDots = dotGroups.append("circle")
         .attr("cx", d => d.x)
         .attr("cy", d => d.y)
         .attr("r", 15)
         .attr("class", "dot-activation")
         .style("transform",
           `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-        )
-        .on("mouseenter", onMouseEnter)
-        .on("mouseleave", onMouseLeave);
-    bounds.selectAll(".dot")
-      .data(daysData)
-      .join("circle")
+        );
+    const dots = dotGroups.insert("circle")
         .attr("cx", d => d.x)
         .attr("cy", d => d.y)
         .attr("r", 4)
@@ -195,6 +255,15 @@ async function drawBars() {
         .style("transform",
           `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
         );
+
+    console.log("exit dotGroupsContainer", JSON.stringify(dotGroupsContainer.exit()));
+    console.log("exit dotGroupsContainer.Select", JSON.stringify(dotGroupsContainer.select(".dot-groups").exit()));
+    console.log("exit dotGroups", JSON.stringify(dotGroups.exit()));
+    console.log("exit activationDots", JSON.stringify(activationDots.exit()));
+    console.log("exit dots", JSON.stringify(dots.exit()));
+    // activationDots.exit().remove();
+    // dots.exit().remove();
+
   };
 
   // Set up interactions.

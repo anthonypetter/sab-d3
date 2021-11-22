@@ -29,6 +29,7 @@ body {
 }
 
 .dot,
+.dot-activation,
 .line {
     transition: all 0.3s ease-out;
 }
@@ -44,13 +45,13 @@ body {
 .dot {
     fill: cornflowerblue;
 }
-.dot:hover {
-    fill: #18da68;
-    transition: fill 0.6s ease;
-}
 .dot-activation {
     opacity: 0.05;
     fill: green;
+}
+.dot-activation:hover + .dot {
+    fill: #18da68;
+    transition: fill 0.6s ease;
 }
 
 .grid-line {
