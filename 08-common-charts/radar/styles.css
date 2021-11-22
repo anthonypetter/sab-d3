@@ -49,6 +49,7 @@ body {
     opacity: 0.05;
     fill: green;
 }
+.dot:hover, /* See https://stackoverflow.com/a/12574836 */
 .dot-activation:hover + .dot {
     fill: #18da68;
     transition: fill 0.6s ease;

@@ -139,6 +139,9 @@ async function drawBars() {
   const line = bounds.append("path")
       .attr("class", "line");
 
+  const dotGroupsContainer = bounds.append("g")
+    .attr("class", "dot-groups-container");
+
   const drawLine = (day) => {
     /**
      * This is a cool thing. Here lines are being drawn with d3.lineRadial().
@@ -174,96 +177,96 @@ async function drawBars() {
       };
     });
 
-    // // const dots = dotGroup.selectAll(".dot-activation").data(daysData);
-    // const dots = dotGroup.selectAll(".dot-activation")
-    // .join("circle")
-    //     .attr("cx", d => d.x)
-    //     .attr("cy", d => d.y)
-    //     .attr("r", 15)
-    //     .attr("class", "dot-activation")
-    //     .style("transform",
-    //       `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-    //     );
-
-
-
-
-    // const activationDots = bounds.selectAll(".dot-activation")
+    // Basic working single dot.
+    // const dots = dotGroupsContainer.selectAll(".dot")
     //   .data(daysData)
-    //   .enter();
-    // activationDots.append("circle")
-    //     .attr("cx", d => d.x)
-    //     .attr("cy", d => d.y)
-    //     .attr("r", 15)
-    //     .attr("class", "dot-activation")
-    //     .style("transform",
-    //       `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-    //     )
-    //     .on("mouseenter", onMouseEnter)
-    //     .on("mouseleave", onMouseLeave);
-    // activationDots.insert("circle")
+    //   .join("circle")
     //     .attr("cx", d => d.x)
     //     .attr("cy", d => d.y)
     //     .attr("r", 4)
     //     .attr("class", "dot")
-    //     .style("transform",
-    //       `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-    //     );
-
-    // activationDots.exit().remove();
-
-    // const combinedDot = d3.select().append("circle")
-    //   .attr("cx", d => d.x)
-    //   .attr("cy", d => d.y)
-    //   .attr("r", 15)
-    //   .attr("class", "dot-activation")
     //   .style("transform",
     //     `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-    //   ).insert("circle")
-    //   .attr("cx", d => d.x)
-    //   .attr("cy", d => d.y)
-    //   .attr("r", 4)
-    //   .attr("class", "dot")
-    //   .style("transform",
-    //     `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-    //   );
+    //   )
+    //   .on("mouseenter", onMouseEnter)
+    //   .on("mouseleave", onMouseLeave);
 
-    const dotGroupsContainer = bounds.append("g")
-      .attr("class", "dot-groups-container");
-    const dotGroups = dotGroupsContainer.selectAll(".dot-groups")
+    /**
+     * Oh my god this mother trucker took some time to figure out. But I'm glad
+     * to say that the solution is understandable. I also learned that D3.js
+     * really suggests we all move to using the .join() function instead of
+     * using enter(), update(), exit().
+     *  See https://observablehq.com/@d3/selection-join
+     * I want to thank Bryony Miles for having a great example using SVG groups
+     * in both old style merge() updates and with join(). Without her demo I
+     * would've given up and believed (lacking any saying otherwise) that this
+     * kind of manipulation with .join() isn't possible with SVG groups... and
+     * that would have been a horrible false lesson to take away!
+     *  See https://www.codementor.io/@milesbryony/d3-js-join-14gqdz3hfj
+     */
+    const dotGroups = dotGroupsContainer.selectAll(".dot-group")
       .data(daysData)
-      .join("g")
-      .attr("class", "dot-group")
+      .join(
+        enter => {
+          const group = enter.append("g").attr("class", "dot-group");
+          group.append("circle")
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y)
+            .attr("r", 15)
+            .attr("class", "dot-activation");
+          group.append("circle")
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y)
+            .attr("r", 4)
+            .attr("class", "dot");
+          group.style("transform",
+            `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
+          );
+          return group;
+        },
+        update => {
+          update.select(".dot-activation")
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+          update.select(".dot")
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+          return update;
+        },
+        // exit => exit.remove(), // No need - this is default behavior.
+
+        /**
+         * This is a failed experiment to translate the group itself and leave
+         * the cx and cy values blank. Only problem was the movements were
+         * instantaneous. It would still be possible to make this work if I
+         * controlled transitions in D3 instead of in CSS - which I didn't
+         * want to do because I would have transitions defined in two
+         * locations: for this and for lines.
+         * If I was very dedicated I could do that... but now? Nah...
+         * Quick Google shows that it appears that yes, D3.js can animate
+         * transforms. See here -> https://bl.ocks.org/mbostock/1345853
+         */
+        /*
+        enter => {
+          const enter = group.append("g").attr("class", "dot-group");
+          enter.append("circle").attr("r", 15).attr("class", "dot-activation");
+          enter.append("circle").attr("r", 4).attr("class", "dot");
+          enter.style("transform", d => "translate(" +
+            `${d.x + dimensions.boundedRadius}px,` +
+            `${d.y + dimensions.boundedRadius}px)`,
+          );
+          return enter;
+        }
+        update => {
+          update => update.style("transform", d => "translate(" +
+            `${d.x + dimensions.boundedRadius}px,` +
+            `${d.y + dimensions.boundedRadius}px)`,
+          ),
+        },
+        */
+      )
       .on("mouseenter", onMouseEnter)
       .on("mouseleave", onMouseLeave);
-
-    // dotGroups.exit().remove();
-
-    const activationDots = dotGroups.append("circle")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .attr("r", 15)
-        .attr("class", "dot-activation")
-        .style("transform",
-          `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-        );
-    const dots = dotGroups.insert("circle")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .attr("r", 4)
-        .attr("class", "dot")
-        .style("transform",
-          `translate(${dimensions.boundedRadius}px, ${dimensions.boundedRadius}px)`,
-        );
-
-    console.log("exit dotGroupsContainer", JSON.stringify(dotGroupsContainer.exit()));
-    console.log("exit dotGroupsContainer.Select", JSON.stringify(dotGroupsContainer.select(".dot-groups").exit()));
-    console.log("exit dotGroups", JSON.stringify(dotGroups.exit()));
-    console.log("exit activationDots", JSON.stringify(activationDots.exit()));
-    console.log("exit dots", JSON.stringify(dots.exit()));
-    // activationDots.exit().remove();
-    // dots.exit().remove();
-
   };
 
   // Set up interactions.
