@@ -100,8 +100,10 @@ async function drawBars() {
      */
     const angle = i * ((Math.PI * 2) / metrics.length) - Math.PI * 0.5;
 
-    console.log("i * ((   Math.PI * 2   ) / metrics.length) -   Math.PI * 0.5    =       angle" +
-      `\n${i} * (<${Math.PI * 2}) /      ${metrics.length}        ) - ${Math.PI * 0.5} = ${angle}`);
+    console.log(
+      "i * ((   Math.PI * 2   ) / metrics.length) -   Math.PI * 0.5    =       angle" +
+      `\n${i} * ( ${Math.PI * 2}  /      ${metrics.length}        ) - ${Math.PI * 0.5} = ${angle}`,
+    );
 
     return axis.append("line")
       .attr("x1", dimensions.boundedWidth / 2)  // Middle of chart.
@@ -128,7 +130,7 @@ async function drawBars() {
       .attr("class", "metric-label")
       .style("text-anchor",
         i == 0 || i == metrics.length / 2 ? "middle" :
-          i < metrics.length / 2            ? "start"  :
+          i < metrics.length / 2 ? "start" :
             "end",
       )
       .text(metric);
