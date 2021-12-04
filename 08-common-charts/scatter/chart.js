@@ -6,14 +6,14 @@ async function drawScatter() {
 
   // 2. Create chart dimensions
 
-  const xAccessor = d => d.temperatureMax;
-  const yAccessor = d => d.pressure;
+  const xAccessor = d => d.temperatureMin;
+  const yAccessor = d => d.temperatureMax;
 
   const width = d3.min([
     window.innerWidth * 0.9,
     window.innerHeight * 0.9,
   ]);
-  let dimensions = {
+  const dimensions = {
     width: width,
     height: width,
     margin: {
@@ -22,6 +22,8 @@ async function drawScatter() {
       bottom: 50,
       left: 50,
     },
+    boundedWidth: 0,
+    boundedHeight: 0,
   };
   dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
   dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
@@ -67,6 +69,37 @@ async function drawScatter() {
   };
   drawDots(dataset);
 
+  /**
+   * Draw regression line.
+   * Adding a line of best fit is something we can add ourselves. Using a
+   * library to do it for me I have to thank user rotexhawk for giving me a
+   * hint on CodeSandbox -> https://codesandbox.io/s/iyfpk
+   * https://observablehq.com/@harrystevens/introducing-d3-regression
+   * https://github.com/harrystevens/d3-regression
+   */
+  const drawLine = (dataset) => {
+    const lineGenerator = d3.line()
+      .x(d => xScale(d[0]))
+      .y(d => yScale(d[1]));
+
+    const linearRegression = d3.regressionLinear()
+      .x(d => xAccessor(d))
+      .y(d => yAccessor(d))
+      .domain([ // Make sure to stretch to ends of chart. May not be best solution.
+        Math.min(xScale.domain()[0], yScale.domain()[0]),
+        Math.max(xScale.domain()[1], yScale.domain()[1]),
+      ]);
+
+    const regressionLine = linearRegression(dataset);
+
+    console.log(regressionLine); // Very useful to look at this.
+
+    const line = bounds.append("path")
+        .attr("class", "line")
+        .attr("d", lineGenerator(regressionLine));
+  };
+  drawLine(dataset);
+
   // 6. Draw peripherals
 
   const xAxisGenerator = d3.axisBottom()
@@ -80,7 +113,7 @@ async function drawScatter() {
       .attr("class", "x-axis-label")
       .attr("x", dimensions.boundedWidth / 2)
       .attr("y", dimensions.margin.bottom - 10)
-      .html("Maximum Temperature (&deg;F)");
+      .html("Minimum Temperature (&deg;F)");
 
   const yAxisGenerator = d3.axisLeft()
     .scale(yScale)
@@ -93,6 +126,6 @@ async function drawScatter() {
       .attr("class", "y-axis-label")
       .attr("x", -dimensions.boundedHeight / 2)
       .attr("y", -dimensions.margin.left + 10)
-      .text("Pressure");
+      .html("Maximum Temperature (&deg;F)");
 }
 drawScatter();

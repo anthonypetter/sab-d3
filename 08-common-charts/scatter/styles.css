@@ -32,3 +32,9 @@ body {
 circle {
     fill: cornflowerblue;
 }
+
+.line {
+    fill: none;
+    stroke: #af9358;
+    stroke-width: 2;
+}
