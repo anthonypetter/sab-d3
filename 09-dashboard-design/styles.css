@@ -20,5 +20,51 @@ table {
 }
 
 td {
-    border: 1px solid;
+    padding: 0.8em 0.8rem;
+}
+
+thead {
+    font-size: 0.9em;
+    letter-spacing: 0;
+    font-weight: 900;
+    white-space: nowrap;
+    text-align: left;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    color: #f8f9fa;
+    background: #34495e;
+    padding: 1em, 0.8rem;
+}
+
+tbody tr:nth-child(odd) {
+    background: #f0f0f3;
+}
+
+tbody tr:hover {
+    background: #d7ecec;
+}
+
+/*
+ * font-feature-settings set like that makes it monospace (a special feature of
+ * the font, Inter, that we're using. It's good to make numbers and our dates
+ * monospace so that the spacing doesn't maket he numbers look weird - with some
+ * taking up more space than others.
+*/
+.number {
+    text-align: right;
+    font-feature-settings: 'tnum' 1;
+}
+.date {
+    text-align: right;
+    font-feature-settings: 'tnum' 1;
+}
+
+tbody .text {
+    font-size: 0.9em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }

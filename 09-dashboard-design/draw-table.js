@@ -7,16 +7,48 @@ async function drawTable() {
 
   const table = d3.select("#table");
 
-  const numberOfRows= 10;
+  const dateFormat = d => d3.timeFormat("%-m/%d")(dateParser(d));
+  const hourFormat = d => d3.timeFormat("%-I %p")(new Date(d * 1000));
+  const format24HourTime = d => +d3.timeFormat("%H")(new Date(d * 1000));
+
+  const numberOfRows= 60;
 
   const columns = [
-    {label: "Day", type: "text", format: d => d.date},
-    {label: "Summary", type: "text", format: d => d.summary},
-    {label: "Max Temp", type: "number", format: d => d.temperatureMax},
-    {label: "Max Temp Time", type: "text", format: d => d.apparentTemperatureMaxTime},
-    {label: "Wind Speed", type: "number", format: d => d.windSpeed},
-    {label: "Precipitation", type: "text", format: d => d.precipType},
-    {label: "UV Index", type: "number", format: d => d.uvIndex},
+    {
+      label: "Day",
+      type: "text",
+      format: d => dateFormat(d.date),
+    },
+    {
+      label: "Summary",
+      type: "text",
+      format: d => d.summary,
+    },
+    {
+      label: "Max Temp",
+      type: "number",
+      format: d => d.temperatureMax,
+    },
+    {
+      label: "Max Temp Time",
+      type: "text",
+      format: d => hourFormat(d.apparentTemperatureMaxTime),
+    },
+    {
+      label: "Wind Speed",
+      type: "number",
+      format: d => d.windSpeed,
+    },
+    {
+      label: "Precipitation",
+      type: "text",
+      format: d => d.precipType,
+    },
+    {
+      label: "UV Index",
+      type: "number",
+      format: d => d.uvIndex,
+    },
   ];
 
   table.append("thead").append("tr")
