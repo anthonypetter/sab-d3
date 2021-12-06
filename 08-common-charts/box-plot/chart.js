@@ -1,3 +1,7 @@
+/**
+ * There's nothing particularly mind-blowing about this chart but it's worth
+ * being able to come back and take a look at this.
+ */
 async function drawBars() {
 
   // 1. Access data
@@ -11,12 +15,15 @@ async function drawBars() {
   const yAccessor = d => d.temperatureMax;
   const monthAccessor = d => d.month;
 
+  /**
+   * Cool to see the various statistical functions that d3 offers.
+   */
   const dataByMonthWithStats = dataByMonth.map(([month, values]) => {
     const monthYValues = values.map(yAccessor).sort((a,b) => a - b);
     const q1 = d3.quantile(monthYValues, 0.25);
     const median = d3.median(monthYValues);
     const q3 = d3.quantile(monthYValues, 0.75);
-    const iqr = q3 - q1;
+    const iqr = q3 - q1;  // The middle 50%'s distance.
     const [min, max] = d3.extent(monthYValues);
     const rangeMin = d3.max([min, q1 - iqr * 1.5]);
     const rangeMax = d3.min([max, q3 + iqr * 1.5]);
@@ -24,14 +31,14 @@ async function drawBars() {
 
     return {
       month: +month,
-      q1, median, q3, iqr, min, max, rangeMin, rangeMax, outliers
+      q1, median, q3, iqr, min, max, rangeMin, rangeMax, outliers,
     };
   });
 
   // 2. Create chart dimensions
 
   const width = 700;
-  let dimensions = {
+  const dimensions = {
     width: width,
     height: width * 0.6,
     margin: {
@@ -40,6 +47,8 @@ async function drawBars() {
       bottom: 30,
       left: 50,
     },
+    boundedWidth: 0,
+    boundedHeight: 0,
   };
   dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
   dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
@@ -55,9 +64,8 @@ async function drawBars() {
       .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`);
 
   // 4. Create scales
-
   const xScale = d3.scaleLinear()
-    .domain([1, dataByMonth.length])
+    .domain([1, dataByMonth.length + 1])  // See December.
     .rangeRound([0, dimensions.boundedWidth])
     .nice();
 
@@ -66,6 +74,8 @@ async function drawBars() {
     .thresholds(dataByMonth.length);
 
   const bins = binsGenerator(dataByMonthWithStats);
+
+  console.log(bins);
 
   const yScale = d3.scaleLinear()
     .domain([
