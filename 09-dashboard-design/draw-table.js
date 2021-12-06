@@ -12,6 +12,18 @@ async function drawTable() {
   const format24HourTime = d => +d3.timeFormat("%H")(new Date(d * 1000));
 
   const numberOfRows= 60;
+  const colorScale = d3.interpolateHcl("#a6c3e8", "#efa8a1");
+  const grayColorScale = d3.interpolateHcl("#fff", "#bdc4ca");
+
+  const tempScale = d3.scaleLinear()
+    .domain(d3.extent(dataset.slice(0, numberOfRows), d => d.temperatureMax))
+    .range([0, 1]); // See? This makes our scale go from 0 to 1. Easy!
+  const timeScale = d3.scaleLinear()
+    .domain([0, 24])
+    .range([0, 80]);  // Magic number. Max at 80%. Any higher and padding (?) pushes it off the edge.
+  const windScale = d3.scaleLinear()
+    .domain(d3.extent(dataset.slice(0, numberOfRows), d => d.windSpeed))
+    .range([0, 1]); // 0, 1 range makes us able to plug it into any color scale!
 
   const columns = [
     {
@@ -27,17 +39,20 @@ async function drawTable() {
     {
       label: "Max Temp",
       type: "number",
-      format: d => d.temperatureMax,
+      format: d => d3.format(".1f")(d.temperatureMax),
+      background: d => colorScale(tempScale(d.temperatureMax)),
     },
     {
       label: "Max Temp Time",
-      type: "text",
-      format: d => hourFormat(d.apparentTemperatureMaxTime),
+      type: "marker",
+      format: d => "|",
+      transform: d => `translateX(${timeScale(format24HourTime(d.apparentTemperatureMaxTime))}%)`,
     },
     {
       label: "Wind Speed",
       type: "number",
       format: d => d.windSpeed,
+      background: d => grayColorScale(windScale(d.windSpeed)),
     },
     {
       label: "Precipitation",
@@ -66,7 +81,9 @@ async function drawTable() {
       .data(columns)
       .enter().append("td")
         .text(column => column.format(d))
-        .attr("class", column => column.type);
+        .attr("class", column => column.type)
+        .style("background", column => column.background && column.background(d))
+        .style("transform", column => column.transform && column.transform(d));
   });
 }
 drawTable();
