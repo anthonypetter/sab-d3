@@ -41,7 +41,10 @@
     "no-undef": "off",
     "no-unused-vars": [
       "warn",
-      { "varsIgnorePattern": "^_" }
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
     ],
     "comma-dangle": [
       "error",
