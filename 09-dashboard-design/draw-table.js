@@ -11,9 +11,10 @@ async function drawTable() {
   const hourFormat = d => d3.timeFormat("%-I %p")(new Date(d * 1000));
   const format24HourTime = d => +d3.timeFormat("%H")(new Date(d * 1000));
 
-  const numberOfRows= 60;
+  const numberOfRows= 300;
   const colorScale = d3.interpolateHcl("#a6c3e8", "#efa8a1");
   const grayColorScale = d3.interpolateHcl("#fff", "#bdc4ca");
+  const uvColorScale = d3.interpolateLab("#bdc4ca", "#f6ef88");
 
   const tempScale = d3.scaleLinear()
     .domain(d3.extent(dataset.slice(0, numberOfRows), d => d.temperatureMax))
@@ -24,6 +25,9 @@ async function drawTable() {
   const windScale = d3.scaleLinear()
     .domain(d3.extent(dataset.slice(0, numberOfRows), d => d.windSpeed))
     .range([0, 1]); // 0, 1 range makes us able to plug it into any color scale!
+  const uvScale = d3.scaleLinear()
+    .domain([0, 10])
+    .range([0, 1]);
 
   const columns = [
     {
@@ -56,13 +60,14 @@ async function drawTable() {
     },
     {
       label: "Precipitation",
-      type: "text",
-      format: d => d.precipType,
+      type: "centered",
+      format: d => d.precipType === "snow" ? "❄️" : d.precipType === "rain" ? "💦" : "",
     },
     {
       label: "UV Index",
-      type: "number",
-      format: d => d.uvIndex,
+      type: "symbol",
+      format: d => new Array(+d.uvIndex).fill("☀️").join(""),
+      background: d => uvColorScale(uvScale(+d.uvIndex)),
     },
   ];
 

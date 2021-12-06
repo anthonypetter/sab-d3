@@ -62,6 +62,15 @@ tbody tr:hover {
     font-feature-settings: 'tnum' 1;
 }
 
+.centered {
+    text-align: center;
+}
+
+tbody .symbol {
+    opacity: 0.6;
+    font-size: 0.7em;
+}
+
 tbody .marker {
     font-size: 0.7em;
 }
