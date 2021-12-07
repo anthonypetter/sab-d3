@@ -38,5 +38,5 @@ circle {
 }
 
 .bounds-background {
-    fill: white;
+    fill: white;    /* Rects use fill, not color or background. */
 }
