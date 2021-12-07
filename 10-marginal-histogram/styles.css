@@ -73,6 +73,15 @@ circle {
     fill: transparent;
 }
 
+.hover-line {
+    fill: #5758BB;
+    transition: all 0.2s ease-out;
+    opacity: 0.5;
+    pointer-events: none; /* Make sure we don't have pointer interference */
+    mix-blend-mode: color-burn; /* Like Photoshop blend modes! */
+    /* I'm sure there are some interesting ways I can use special clipping rules
+    to make the hover lines appear only in the histogram. */
+}
 /* Tool Tip Styles */
 .tooltip {
     opacity: 0;

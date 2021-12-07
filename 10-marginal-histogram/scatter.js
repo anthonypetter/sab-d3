@@ -256,6 +256,11 @@ async function drawScatter() {
   const dayDot = hoverElementsGroup.append("circle")
       .attr("class", "tooltip-dot");
 
+  const horizontalLine = hoverElementsGroup.append("rect")
+      .attr("class", "hover-line");
+  const verticalLine = hoverElementsGroup.append("rect")
+      .attr("class", "hover-line");
+
   function onVoronoiMouseEnter(_e, datum) {
     hoverElementsGroup.style("opacity", 1);
 
@@ -264,6 +269,21 @@ async function drawScatter() {
     dayDot.attr("cx", _d => x)
         .attr("cy", _d => y)
         .attr("r", 7);
+
+    const hoverLineThickness = 10;
+    horizontalLine.attr("x", x)
+      .attr("y", y - hoverLineThickness / 2)
+      .attr("width", dimensions.boundedWidth
+        + dimensions.histogramMargin
+        + dimensions.histogramHeight
+        - x)
+      .attr("height", hoverLineThickness);
+    verticalLine.attr("x", x - hoverLineThickness / 2)
+      .attr("y", -dimensions.histogramMargin - dimensions.histogramHeight)
+      .attr("width", hoverLineThickness)
+      .attr("height", y
+        + dimensions.histogramMargin
+        + dimensions.histogramHeight);
 
     const formatTemperature = d3.format(".1f");
     tooltip.select("#max-temperature")
