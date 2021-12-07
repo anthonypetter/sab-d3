@@ -36,3 +36,7 @@ svg text {
 circle {
     fill: cornflowerblue;
 }
+
+.bounds-background {
+    fill: white;
+}

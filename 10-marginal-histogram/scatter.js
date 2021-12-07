@@ -14,7 +14,7 @@ async function drawScatter() {
     window.innerWidth * 0.75,
     window.innerHeight * 0.75,
   ]);
-  let dimensions = {
+  const dimensions = {
     width: width,
     height: width,
     margin: {
@@ -23,6 +23,8 @@ async function drawScatter() {
       bottom: 50,
       left: 50,
     },
+    boundedWidth: 0,
+    boundedHeight: 0,
   };
   dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
   dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
@@ -37,15 +39,33 @@ async function drawScatter() {
   const bounds = wrapper.append("g")
     .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`);
 
+  const boundsBackground = bounds.append("rect")
+      .attr("class", "bounds-background")
+      .attr("x", 0)
+      .attr("width", dimensions.boundedWidth)
+      .attr("y", 0)
+      .attr("height", dimensions.boundedHeight);
+
   // 4. Create scales
 
+  /**
+   * Combine temp max and min into a single array and get the extent there.
+   * Otherwise our X and Y domains will be different. For the sake of max/min
+   * comparisons we should have the same 0 and max on both. That makes our
+   * chart's aspect ratio a proper 1:1, so a 45° slope is the equal point.
+   */
+  const temperatureExtent = d3.extent([
+    ...dataset.map(xAccessor),
+    ...dataset.map(yAccessor),
+  ]);
+
   const xScale = d3.scaleLinear()
-    .domain(d3.extent(dataset, xAccessor))
+    .domain(temperatureExtent)
     .range([0, dimensions.boundedWidth])
     .nice();
 
   const yScale = d3.scaleLinear()
-    .domain(d3.extent(dataset, yAccessor))
+    .domain(temperatureExtent)
     .range([dimensions.boundedHeight, 0])
     .nice();
 
