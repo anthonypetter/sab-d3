@@ -40,3 +40,7 @@ circle {
 .bounds-background {
     fill: white;    /* Rects use fill, not color or background. */
 }
+
+.histogram-area {
+    fill: #cbd2d7;
+}

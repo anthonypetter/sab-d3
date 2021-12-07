@@ -30,6 +30,8 @@ async function drawScatter() {
     },
     boundedWidth: 0,
     boundedHeight: 0,
+    histogramMargin: 10,
+    histogramHeight: 70,
   };
   dimensions.boundedWidth = dimensions.width -
     dimensions.margin.left - dimensions.margin.right;
@@ -129,6 +131,44 @@ async function drawScatter() {
       .style("fill", d => colorScale(colorAccessor(d)))
       .style("stroke", "black")
       .style("stroke-opacity", "0.2");
+
+  // Top Histogram
+  const topHistogramGenerator = d3.bin()
+    .domain(xScale.domain())
+    .value(xAccessor)
+    .thresholds(20);
+
+  const topHistogramBins = topHistogramGenerator(dataset);
+
+  // Yes, we're creating a scale here and not up where the other scales are.
+  const topHistogramYScale = d3.scaleLinear()
+    .domain(d3.extent(topHistogramBins, d => d.length))
+    .range([dimensions.histogramHeight, 0]);  // Y axis, so, [70, 0].
+
+  const topHistogramBounds = bounds.append("g")
+      .attr("transform", `translate(0, ${
+        -dimensions.histogramHeight - dimensions.histogramMargin
+      })`); // Move it up to the area at the top we want to use.
+
+  /**
+   * We use d3.area() because d3.line() doesn't have a bottom (unless we make
+   * it, see what we did in the radar chart in ch 8). But that means that if
+   * the Y axis of the first and last point are different you'll get a horrible
+   * slicing effect.
+   * Here we're giving the datum from the bins and using the bin's x0 and x1
+   * positions in the xScale and finding the middle point between the two to be
+   * our x. y0() is our floor (always the height, in this case). y1() is the
+   * height of the datum we want to render.
+   */
+  const topHistogramLineGenerator = d3.area()
+    .x(d => xScale((d.x0 + d.x1) / 2))
+    .y0(dimensions.histogramHeight)
+    .y1(d => topHistogramYScale(d.length))
+    .curve(d3.curveBasis);
+
+  const topHistogramElement = topHistogramBounds.append("path")
+      .attr("d", _ => topHistogramLineGenerator(topHistogramBins))
+      .attr("class", "histogram-area");
 
   // 6. Draw peripherals
 
