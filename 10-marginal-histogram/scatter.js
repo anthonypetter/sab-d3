@@ -230,6 +230,61 @@ async function drawScatter() {
       .html("Maximum Temperature (&deg;F)");
 
   // 7. Set up interactions
+  const delaunay = d3.Delaunay.from(
+    dataset,
+    d => xScale(xAccessor(d)),
+    d => yScale(yAccessor(d)),
+  );
+  const voronoiPolygons = delaunay.voronoi();
+  voronoiPolygons.xmax = dimensions.boundedWidth;
+  voronoiPolygons.ymax = dimensions.boundedHeight;
 
+  const voronoi = dotsGroup.selectAll(".voronoi")
+    .data(dataset)
+      .join("path")
+      .attr("class", "voronoi")
+      // .attr("stroke", "grey")
+      .attr("d", (_d, i) => voronoiPolygons.renderCell(i));
+
+  voronoi.on("mouseenter", onVoronoiMouseEnter)
+    .on("mouseleave", onVoronoiMouseLeave);
+
+  const tooltip = d3.select("#tooltip");
+  const hoverElementsGroup = bounds.append("g")
+    .attr("opacity", 0);
+
+  const dayDot = hoverElementsGroup.append("circle")
+      .attr("class", "tooltip-dot");
+
+  function onVoronoiMouseEnter(_e, datum) {
+    hoverElementsGroup.style("opacity", 1);
+
+    const x = xScale(xAccessor(datum));
+    const y = yScale(yAccessor(datum));
+    dayDot.attr("cx", _d => x)
+        .attr("cy", _d => y)
+        .attr("r", 7);
+
+    const formatTemperature = d3.format(".1f");
+    tooltip.select("#max-temperature")
+      .text(formatTemperature(yAccessor(datum)));
+    tooltip.select("#min-temperature")
+      .text(formatTemperature(xAccessor(datum)));
+
+    const dateParser = d3.timeParse("%Y-%m-%d");
+    const formatDate = d3.timeFormat("%A, %B %-d, %Y");
+    tooltip.select("#date").text(formatDate(dateParser(datum.date)));
+
+    tooltip.style("transform", "translate("
+      + `calc(${x + dimensions.margin.left}px + -50%),`
+      + `calc(${y + dimensions.margin.top - 4}px + -100%)`);
+
+    tooltip.style("opacity", 1);
+  }
+
+  function onVoronoiMouseLeave() {
+    hoverElementsGroup.style("opacity", 0);
+    tooltip.style("opacity", 0);
+  }
 }
 drawScatter();
