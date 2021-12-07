@@ -170,6 +170,36 @@ async function drawScatter() {
       .attr("d", _ => topHistogramLineGenerator(topHistogramBins))
       .attr("class", "histogram-area");
 
+  // Right Historgram
+  const rightHistorgramGenerator = d3.bin()
+    .domain(yScale.domain())
+    .value(yAccessor)
+    .thresholds(20);
+
+  const rightHistogramBins = rightHistorgramGenerator(dataset);
+
+  const rightHistogramYScale = d3.scaleLinear()
+    .domain(d3.extent(rightHistogramBins, d => d.length))
+    .range([dimensions.histogramHeight, 0]);
+
+  const rightHistogramBounds = bounds.append("g")
+    .style("transform-origin", `0 ${dimensions.histogramHeight}px`)
+    .style("transform", `translate(${
+      dimensions.boundedWidth + dimensions.histogramMargin
+    }px, -${
+      dimensions.histogramHeight
+    }px) rotate(90deg)`); // We're rotating the whole thing!
+
+  const rightHistogramLineGenerator = d3.area()
+    .x(d => yScale((d.x0 + d.x1) / 2))
+    .y0(dimensions.histogramHeight)
+    .y1(d => rightHistogramYScale(d.length))
+    .curve(d3.curveBasis);
+
+  const rightHistogramElement = rightHistogramBounds.append("path")
+    .attr("d", _ => rightHistogramLineGenerator(rightHistogramBins))
+    .attr("class", "histogram-area");
+
   // 6. Draw peripherals
 
   const xAxisGenerator = d3.axisBottom()
