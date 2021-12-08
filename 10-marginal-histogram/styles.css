@@ -82,6 +82,17 @@ circle {
     /* I'm sure there are some interesting ways I can use special clipping rules
     to make the hover lines appear only in the histogram. */
 }
+
+.legend-value {
+    font-size: 0.76em;
+    text-anchor: middle;
+    /* font-feature-settings: 'tnum' 1; */
+    transition: all 0.2s ease-out;
+}
+.legend-tick {
+    stroke: #7c7c7c;
+}
+
 /* Tool Tip Styles */
 .tooltip {
     opacity: 0;

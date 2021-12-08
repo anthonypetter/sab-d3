@@ -9,9 +9,15 @@ async function drawScatter() {
   const xAccessor = d => d.temperatureMin;
   const yAccessor = d => d.temperatureMax;
 
-  const colorScaleYear = 2000;  // Force to be the same year. Forget about leap year issues.
+  const COLOR_SCALE_YEAR = 2000;  // Force to be the same year. Forget about leap year issues.
   const parseDate = d3.timeParse("%Y-%m-%d");
-  const colorAccessor = d => parseDate(d.date).setYear(colorScaleYear);
+  const colorAccessor = d => parseDate(d.date).setYear(COLOR_SCALE_YEAR);
+
+  // Collection of the "midpoints" of each season (Northern Hemisphere).
+  const WINTER_DATE = parseDate(`${COLOR_SCALE_YEAR}-02-03`); // Winter
+  const SPRING_DATE = parseDate(`${COLOR_SCALE_YEAR}-05-06`); // Spring
+  const SUMMER_DATE = parseDate(`${COLOR_SCALE_YEAR}-08-07`); // Summer
+  const AUTUMN_DATE = parseDate(`${COLOR_SCALE_YEAR}-10-31`); // Autumn
 
   // 2. Create chart dimensions
 
@@ -98,25 +104,25 @@ async function drawScatter() {
    * on the solstices and equinoxes, so I vaguely put them half way through.
    * Seems about right, huh? Feb 15 being the dead of winter, April 30 being
    * the heart of spring, August 1 being the peak of summer, and November 11
-   * being the depth of fall.
+   * being the depth of autumn.
    * I then used an online tool to get me the middle point in the gradient
-   * between Fall and Winter and named it "New Years".
+   * between Autumn and Winter and named it "New Years".
    */
   const colorScale = d3.scaleLinear()
     .domain([
-      parseDate(`${colorScaleYear}-01-01`),  // New Years
-      parseDate(`${colorScaleYear}-02-15`),  // Winter
-      parseDate(`${colorScaleYear}-04-30`),  // Spring
-      parseDate(`${colorScaleYear}-08-01`),  // Summer
-      parseDate(`${colorScaleYear}-11-02`),  // Fall
-      parseDate(`${colorScaleYear}-12-31`),  // New Years
+      parseDate(`${COLOR_SCALE_YEAR}-01-01`),  // New Years
+      WINTER_DATE,  // Winter
+      SPRING_DATE,  // Spring
+      SUMMER_DATE,  // Summer
+      AUTUMN_DATE,  // Autumn
+      parseDate(`${COLOR_SCALE_YEAR}-12-31`),  // New Years
     ])
     .range([
       "#a47146",  // New Years
       "#483d8b",  // Winter
       "#00ff7f",  // Spring
       "#ff0",     // Summer
-      "#ffa500",  // Fall
+      "#ffa500",  // Autumn
       "#a47146",  // New Years
     ]);
 
@@ -264,6 +270,31 @@ async function drawScatter() {
       .attr("width", dimensions.legendWidth)
       .style("fill", `url(#${legendGradientId})`);
 
+  // Adding ticks to the legend.
+  const tickValues = [WINTER_DATE, SPRING_DATE, SUMMER_DATE, AUTUMN_DATE];
+  const legendTickScale = d3.scaleLinear()
+      // .domain(colorScale.domain()) // Doesn't work. Due to multiple domains?
+      .domain([
+        parseDate(`${COLOR_SCALE_YEAR}-01-01`),
+        parseDate(`${COLOR_SCALE_YEAR}-12-31`),
+      ])
+      .range([0, dimensions.legendWidth]);
+  const legendValues = legendGroup.selectAll(".legend-value")
+    .data(tickValues)
+    .join("text")
+      .attr("class", "legend-value")
+      .attr("x", legendTickScale)
+      .attr("y", -6)
+      .text(d3.timeFormat("%b %-d"));
+  const legendValueTicks = legendGroup.selectAll(".legend-tick")
+    .data(tickValues)
+    .join("line")
+      .attr("class", "legend-tick")
+      .attr("x1", legendTickScale)
+      .attr("x2", legendTickScale)
+      .attr("y1", 6)
+      .attr("y2", -2);
+
   // 7. Set up interactions
   const delaunay = d3.Delaunay.from(
     dataset,
@@ -342,14 +373,18 @@ async function drawScatter() {
     tooltip.style("opacity", 0);
   }
 
+
   /**
+   * Gives you the date within the year that corresponds (roughly) to whatever
+   * fraction you give it.
+   * Ex: If you give it 0.3 you'll get April 19th.
    * Uses local time because UTC isn't necessary.
-   * @param {*} decimal The 0->1 fraction for stops, will return dates.
+   * @param {*} decimal The decimal fraction value of a calendar year.
    * @returns
    */
   function fractionOfYear(decimal) {
     // Yes, January is month 0.
-    const startEpoch = new Date(colorScaleYear, 0, 1) / 1000;
+    const startEpoch = new Date(COLOR_SCALE_YEAR, 0, 1) / 1000;
     const secondsInYear = 365 * 24 * 60 * 60;
 
     const resultDate = new Date(0).setSeconds((startEpoch + secondsInYear * decimal));
