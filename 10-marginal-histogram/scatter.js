@@ -9,7 +9,7 @@ async function drawScatter() {
   const xAccessor = d => d.temperatureMin;
   const yAccessor = d => d.temperatureMax;
 
-  const colorScaleYear = 2000;  // Force to be the same year.
+  const colorScaleYear = 2000;  // Force to be the same year. Forget about leap year issues.
   const parseDate = d3.timeParse("%Y-%m-%d");
   const colorAccessor = d => parseDate(d.date).setYear(colorScaleYear);
 
@@ -32,6 +32,8 @@ async function drawScatter() {
     boundedHeight: 0,
     histogramMargin: 10,
     histogramHeight: 70,
+    legendWidth: 250,
+    legendHeight: 26,
   };
   dimensions.boundedWidth = dimensions.width -
     dimensions.margin.left - dimensions.margin.right;
@@ -229,6 +231,39 @@ async function drawScatter() {
       .attr("y", -dimensions.margin.left + 10)
       .html("Maximum Temperature (&deg;F)");
 
+  /**
+   * Creating the color gradient legend.
+   * Something weird I realized. If you define your transform as a .style() you
+   * need to use px values. But if its an attribute you just write the numbers.
+   * Adding px to the transform below will break it.
+   */
+  const legendGroup = bounds.append("g")
+      .attr("transform", `translate(${
+        dimensions.boundedWidth - dimensions.legendWidth - 9
+      }, ${
+        dimensions.boundedHeight - 37
+      })`);
+  const defs = wrapper.append("defs");
+  const numberOfGradientStops = 10;
+  const stops = d3.range(numberOfGradientStops).map(
+    i => (i / (numberOfGradientStops - 1)),
+  );
+  const legendGradientId = "legend-gradient";
+  const gradient = defs.append("linearGradient")
+      .attr("id", legendGradientId)
+    .selectAll("stop")
+    .data(stops)
+    .join("stop")
+      // .attr("stop-color", d => d3.interpolateRainbow(-d))
+      .attr("stop-color", d => colorScale(
+        colorAccessor({ date: fractionOfYear(d) }), // Yes. This is ridiculous.
+      ))
+      .attr("offset", d => `${d * 100}%`);
+  const legendGradient = legendGroup.append("rect")
+      .attr("height", dimensions.legendHeight)
+      .attr("width", dimensions.legendWidth)
+      .style("fill", `url(#${legendGradientId})`);
+
   // 7. Set up interactions
   const delaunay = d3.Delaunay.from(
     dataset,
@@ -306,5 +341,22 @@ async function drawScatter() {
     hoverElementsGroup.style("opacity", 0);
     tooltip.style("opacity", 0);
   }
+
+  /**
+   * Uses local time because UTC isn't necessary.
+   * @param {*} decimal The 0->1 fraction for stops, will return dates.
+   * @returns
+   */
+  function fractionOfYear(decimal) {
+    // Yes, January is month 0.
+    const startEpoch = new Date(colorScaleYear, 0, 1) / 1000;
+    const secondsInYear = 365 * 24 * 60 * 60;
+
+    const resultDate = new Date(0).setSeconds((startEpoch + secondsInYear * decimal));
+    const resultDateString = d3.timeFormat("%Y-%m-%d")(resultDate);
+    console.log(decimal, resultDateString, (startEpoch + secondsInYear * decimal));
+    return resultDateString;
+  }
 }
 drawScatter();
+
