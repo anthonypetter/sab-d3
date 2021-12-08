@@ -67,3 +67,8 @@ body {
     stroke: none;
     transition: all 0.3s ease-out;
 }
+
+.uv-line {
+    stroke: #feca57;
+    stroke-width: 2px;
+}
