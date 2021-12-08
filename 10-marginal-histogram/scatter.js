@@ -118,12 +118,12 @@ async function drawScatter() {
       parseDate(`${COLOR_SCALE_YEAR}-12-31`),  // New Years
     ])
     .range([
-      "#a47146",  // New Years
+      "#9b1f62",  // New Years
       "#483d8b",  // Winter
       "#00ff7f",  // Spring
-      "#ff0",     // Summer
-      "#ffa500",  // Autumn
-      "#a47146",  // New Years
+      "#f2ba4a",  // Summer
+      "#aa381e",  // Autumn
+      "#9b1f62",  // New Years
     ]);
 
   // 5. Draw data
@@ -136,9 +136,7 @@ async function drawScatter() {
       .attr("cx", d => xScale(xAccessor(d)))
       .attr("cy", d => yScale(yAccessor(d)))
       .attr("r", 4)
-      .style("fill", d => colorScale(colorAccessor(d)))
-      .style("stroke", "black")
-      .style("stroke-opacity", "0.2");
+      .style("fill", d => colorScale(colorAccessor(d)));
 
   // Top Histogram
   const topHistogramGenerator = d3.bin()

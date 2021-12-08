@@ -56,6 +56,12 @@ circle {
     fill: cornflowerblue;
 }
 
+/* Performance killer. :( */
+/* .dot {
+    stroke: black;
+    stroke-opacity: 20%;
+} */
+
 .bounds-background {
     fill: white;    /* Rects use fill, not color or background. */
 }
