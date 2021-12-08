@@ -125,6 +125,31 @@ async function drawChart() {
         .attr("class", "grid-line")
   ));
 
+  const tickLabelBackgrounds = temperatureTicks.map(d => {
+    if (!d) return;
+    return peripherals.append("rect")
+        .attr("y", -radiusScale(d) - 10)
+        .attr("width", 40)
+        .attr("height", 20)
+        .attr("class", "tick-label-background");
+  });
+
+  const tickLabels = temperatureTicks.map(d => {
+    if (!d) return;
+    return peripherals.append("text")
+        .attr("x", 4)
+        .attr("y", -radiusScale(d) + 2)
+        .attr("class", "tick-label-temperature")
+        .html(`${d3.format(".0f")(d)}°F`);
+  });
+
+  const containsFreezing = radiusScale.domain()[0] < 32;
+  if (containsFreezing) {
+    const freezingCircle = bounds.append("circle")
+        .attr("r", radiusScale(32))
+        .attr("class", "freezing-circle");
+  }
+
 
   // 7. Set up interactions
 

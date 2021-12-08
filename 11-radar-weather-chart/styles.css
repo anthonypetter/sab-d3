@@ -3,6 +3,11 @@
     src: url('./../Inter.var.woff2');
 }
 
+:root {
+    --background-color: #f8f9fa;
+}
+
+
 body {
     display: flex;
     flex-direction: column;
@@ -11,7 +16,7 @@ body {
     font-family: 'Inter var', sans-serif;
     font-size: 16px;
     color: #34495e;
-    background: #f8f9fa;
+    background: var(--background-color);
 }
 
 .title {
@@ -39,4 +44,20 @@ body {
     font-size: 0.7em;
     font-weight: 900;
     letter-spacing: 0.005em;
+}
+
+.tick-label-temperature {
+    dominant-baseline: middle;
+    fill: #8395a7;
+    font-size: 0.7em;
+    opacity: 0.7;
+}
+
+.tick-label-background {
+    fill: var(--background-color);
+}
+
+.freezing-circle {
+    fill: #00d2d3;
+    opacity: 0.15;
 }
