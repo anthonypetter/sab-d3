@@ -395,6 +395,11 @@ async function drawScatter() {
   legendGradient.on("mousemove", onLegendMouseMove)
     .on("mouseleave", onLegendMouseLeave);
 
+  // Mini hover histograms.
+  const hoverTopHistogram = topHistogramBounds.append("path");
+  const hoverRightHistogram = rightHistogramBounds.append("path");
+
+
   function onLegendMouseMove(e) {
     const [x] = d3.pointer(e);  // Get the x coord of pointer relative to e.
 
@@ -469,6 +474,23 @@ async function drawScatter() {
         .style("opacity", 1)
         .attr("r", 5);
 
+    // Build the hover histograms.
+    const hoveredDate = d3.isoParse(legendTickScale.invert(x));
+    const hoveredDates = dataset.filter(isDayWithinRange);
+
+    hoverTopHistogram.attr("d", _d => (
+      topHistogramLineGenerator(topHistogramGenerator(hoveredDates))
+    ))
+        .attr("fill", colorScale(hoveredDate))
+        .attr("stroke", "white")
+        .style("opacity", 1);
+
+    hoverRightHistogram.attr("d", _d => (
+      rightHistogramLineGenerator(rightHistorgramGenerator(hoveredDates))
+    ))
+        .attr("fill", colorScale(hoveredDate))
+        .attr("stroke", "white")
+        .style("opacity", 1);
   }
 
   function onLegendMouseLeave() {
@@ -478,6 +500,8 @@ async function drawScatter() {
 
     legendValues.style("opacity", 1);
     legendValueTicks.style("opacity", 1);
+    hoverTopHistogram.style("opacity", 0);
+    hoverRightHistogram.style("opacity", 0);
     legendHighlightGroup.style("opacity", 0);
   }
 
