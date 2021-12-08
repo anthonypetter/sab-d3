@@ -64,6 +64,20 @@ async function drawChart() {
         }px)`,
       );
 
+  // Creating gradients.
+  const defs = wrapper.append("defs");
+
+  const gradientId = "temperature-gradient";
+  const gradient = defs.append("radialGradient")
+      .attr("id", gradientId);
+  const numberOfStops = 10;
+  const gradientColorScale = d3.interpolateYlOrRd;
+  d3.range(numberOfStops).forEach(i => {
+    gradient.append("stop")
+        .attr("offset", `${i * 100 / (numberOfStops - 1)}%`)
+        .attr("stop-color", gradientColorScale(i / (numberOfStops - 1)));
+  });
+
   // 4. Create scales
 
   const angleScale = d3.scaleTime()
@@ -79,10 +93,7 @@ async function drawChart() {
     .nice();
 
 
-  // 5. Draw data
-
-
-  // 6. Draw peripherals
+  // 5. Draw peripherals
   const peripherals = bounds.append("g");
 
   // How to get a range of months from the domain we're using.
@@ -149,6 +160,23 @@ async function drawChart() {
         .attr("r", radiusScale(32))
         .attr("class", "freezing-circle");
   }
+
+
+  // 6. Draw data
+  /**
+   * Adding the temperature area around the center of the chart is surprisingly
+   * simple. The gradient color, though, is a bit involved. Look above to see
+   * how it's defined.
+   */
+  const areaGenerator = d3.areaRadial()
+      .angle(d => angleScale(dateAccessor(d)))
+      .innerRadius(d => radiusScale(temperatureMinAccessor(d)))
+      .outerRadius(d => radiusScale(temperatureMaxAccessor(d)));
+
+  const area = bounds.append("path")
+      .attr("class", "area")
+      .attr("d", areaGenerator(dataset))
+      .style("fill", `url(#${gradientId})`);
 
 
   // 7. Set up interactions
