@@ -92,6 +92,18 @@ circle {
 .legend-tick {
     stroke: #7c7c7c;
 }
+.legend-highlight-bar {
+    fill: rgba(255, 255, 255, 0.3);
+    stroke: white;
+    stroke-width: 2px;
+    pointer-events: none;
+    shape-rendering: crispEdges;
+}
+.legend-highlight-text {
+    text-anchor: middle;
+    font-size: 0.8em;
+    font-feature-settings: "tnum" 1;
+}
 
 /* Tool Tip Styles */
 .tooltip {

@@ -191,12 +191,12 @@ async function drawScatter() {
     .range([dimensions.histogramHeight, 0]);
 
   const rightHistogramBounds = bounds.append("g")
-    .style("transform-origin", `0 ${dimensions.histogramHeight}px`)
-    .style("transform", `translate(${
-      dimensions.boundedWidth + dimensions.histogramMargin
-    }px, -${
-      dimensions.histogramHeight
-    }px) rotate(90deg)`); // We're rotating the whole thing!
+      .style("transform-origin", `0 ${dimensions.histogramHeight}px`)
+      .style("transform", `translate(${
+        dimensions.boundedWidth + dimensions.histogramMargin
+      }px, -${
+        dimensions.histogramHeight
+      }px) rotate(90deg)`); // We're rotating the whole thing!
 
   const rightHistogramLineGenerator = d3.area()
     .x(d => yScale((d.x0 + d.x1) / 2))
@@ -249,7 +249,9 @@ async function drawScatter() {
       }, ${
         dimensions.boundedHeight - 37
       })`);
+
   const defs = wrapper.append("defs");
+
   const numberOfGradientStops = 10;
   const stops = d3.range(numberOfGradientStops).map(
     i => (i / (numberOfGradientStops - 1)),
@@ -295,7 +297,9 @@ async function drawScatter() {
       .attr("y1", 6)
       .attr("y2", -2);
 
+
   // 7. Set up interactions
+  // Day Dots interactions.
   const delaunay = d3.Delaunay.from(
     dataset,
     d => xScale(xAccessor(d)),
@@ -371,6 +375,112 @@ async function drawScatter() {
   function onVoronoiMouseLeave() {
     hoverElementsGroup.style("opacity", 0);
     tooltip.style("opacity", 0);
+  }
+
+
+  // Legend hover interactions.
+  const legendHighlightBarWidth = dimensions.legendWidth * 0.05;
+  const legendHighlightGroup = legendGroup.append("g")
+      .attr("opacity", 0);
+
+  // We're setting these outside the function for performance reasons.
+  const legendHighlightBar = legendHighlightGroup.append("rect")
+      .attr("class", "legend-highlight-bar")
+      .attr("width", legendHighlightBarWidth)
+      .attr("height", dimensions.legendHeight);
+
+  const legendHighlightText = legendHighlightGroup.append("text")
+      .attr("class", "legend-highlight-text")
+      .attr("x", legendHighlightBarWidth / 2)
+      .attr("y", -6);
+
+  legendGradient.on("mousemove", onLegendMouseMove)
+    .on("mouseleave", onLegendMouseLeave);
+
+  function onLegendMouseMove(e) {
+    const [x] = d3.pointer(e);  // Get the x coord of pointer relative to e.
+
+    /**
+     * Median sorts the values given and gives the middle value (if given 3).
+     * This is like how I used a minMax function long ago with Metric-Teacher.
+     * What it basically does is it'll let you gate the value between a min and
+     * max.
+     */
+    const barX = d3.median([
+      0,
+      x - legendHighlightBarWidth / 2,
+      dimensions.legendWidth - legendHighlightBarWidth,
+    ]);
+
+    const minDateToHighlight = new Date(
+      legendTickScale.invert(x - legendHighlightBarWidth),
+    );
+    const maxDateToHighlight = new Date(
+      legendTickScale.invert(x + legendHighlightBarWidth),
+    );
+
+    legendHighlightGroup.style("opacity", 1)
+        .style("transform", `translateX(${barX}px)`);
+
+    const formatLegendDate = d3.timeFormat("%b %d");
+    legendHighlightText.text([
+      formatLegendDate(minDateToHighlight),
+      formatLegendDate(maxDateToHighlight),
+    ].join(" - "));
+
+    legendValues.style("opacity", 0);
+    legendValueTicks.style("opacity", 0);
+
+    dots.transition().duration(100)
+        .style("opacity", 0.08)
+        .attr("r", 2);
+
+    const getYear = d => +d3.timeFormat("%Y")(d);
+
+    /**
+     * Provides a boolean response to whether the current date is within range.
+     * It also accounds for when you're looking at dates near the start and end
+     * of the year. Depending if the min/max dates are a year below/above the
+     * scale year we then shift the min/max year back to the scale year and do
+     * the check from there.
+     * @param {datum} d
+     * @returns
+     */
+    const isDayWithinRange = (d) => {
+      const date = colorAccessor(d);
+      if (getYear(minDateToHighlight) < COLOR_SCALE_YEAR) {
+        // If dates wrap around to PREVIOUS year,
+        // check if this date is after the min date.
+        return date >= new Date(minDateToHighlight)
+          .setYear(COLOR_SCALE_YEAR) || date <= maxDateToHighlight;
+
+      } else if (getYear(maxDateToHighlight) > COLOR_SCALE_YEAR) {
+        // If dates wrap around to NEXT year,
+        // check if this date is before the max date.
+        return date <= new Date(maxDateToHighlight)
+          .setYear(COLOR_SCALE_YEAR) || date >= minDateToHighlight;
+
+      } else {
+        // Not an edge case. So, just make sure the date is between min and max.
+        return date >= minDateToHighlight && date <= maxDateToHighlight;
+      }
+    };
+
+    const relevantDots = dots.filter(isDayWithinRange)
+      .transition().duration(100)
+        .style("opacity", 1)
+        .attr("r", 5);
+
+  }
+
+  function onLegendMouseLeave() {
+    dots.transition().duration(500)
+        .style("opacity", 1)
+        .attr("r", 4);
+
+    legendValues.style("opacity", 1);
+    legendValueTicks.style("opacity", 1);
+    legendHighlightGroup.style("opacity", 0);
   }
 
 
