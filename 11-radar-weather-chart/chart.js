@@ -1,5 +1,7 @@
 async function drawChart() {
 
+  const TEMPERATURE_TICKS = 4;
+
   // 1. Access data
 
   let dataset = await d3.json("../../resources/nyc_weather_data.json");
@@ -68,6 +70,14 @@ async function drawChart() {
       .domain(d3.extent(dataset, dateAccessor))
       .range([0, Math.PI * 2]); // In radians.
 
+  const radiusScale = d3.scaleLinear()
+    .domain(d3.extent([ // Min and Max temps - for a full range.
+      ...dataset.map(temperatureMaxAccessor),
+      ...dataset.map(temperatureMinAccessor),
+    ]))
+    .range([0, dimensions.boundedRadius])
+    .nice();
+
 
   // 5. Draw data
 
@@ -80,6 +90,7 @@ async function drawChart() {
   const months = d3.timeMonths(...angleScale.domain()); // Shortcut version.
 
   /**
+   * Draw the month spokes.
    * Not sure how to fix it but the chart's spokes are not exactly straight.
    * There is a tiny rotation in all spokes, even the ones facing in a cardinal
    * direction. I tried using utcParse in my date accessor but it doesn't seem
@@ -93,7 +104,26 @@ async function drawChart() {
         .attr("x2", x)
         .attr("y2", y)
         .attr("class", "grid-line");
+
+    const [labelX, labelY] = getCoordinatesForAngle(angle, 1.38);
+    peripherals.append("text")
+        .attr("x", labelX)
+        .attr("y", labelY)
+        .attr("class", "tick-label")
+        .text(d3.timeFormat("%b")(month))
+        .style("text-anchor",
+          Math.abs(labelX) < 5 ? "middle" : // Within 5 pixels of vertical.
+            labelX > 0 ? "start" :  // To the right.
+              "end",                // Else (to the left).
+        );
   });
+
+  const temperatureTicks = radiusScale.ticks(TEMPERATURE_TICKS);
+  const gridCircles = temperatureTicks.map(d => (
+    peripherals.append("circle")
+        .attr("r", radiusScale(d))
+        .attr("class", "grid-line")
+  ));
 
 
   // 7. Set up interactions
@@ -115,6 +145,19 @@ async function drawChart() {
       Math.cos(angle - Math.PI / 2) * dimensions.boundedRadius * offset,
       Math.sin(angle - Math.PI / 2) * dimensions.boundedRadius * offset,
     ];
+  }
+
+  function getCoordinatesFromDataPoint(d, offset) {
+    return getCoordinatesForAngle(
+      angleScale(dateAccessor(d)),
+      offset,
+    );
+  }
+  function getXFromDataPoint(d, offset = 1.4) {
+    getCoordinatesFromDataPoint(d, offset)[0];
+  }
+  function getYFromDataPoint (d, offset = 1.4) {
+    getCoordinatesFromDataPoint(d, offset)[1];
   }
 }
 drawChart();

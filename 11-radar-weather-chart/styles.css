@@ -29,5 +29,14 @@ body {
 }
 
 .grid-line {
+    fill: none;
     stroke: #dadadd;
+}
+
+.tick-label {
+    dominant-baseline: middle;
+    fill: #8395a7;
+    font-size: 0.7em;
+    font-weight: 900;
+    letter-spacing: 0.005em;
 }
