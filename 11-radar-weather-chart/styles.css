@@ -27,3 +27,7 @@ body {
     align-items: center;
     font-feature-settings: 'tnum' 1;
 }
+
+.grid-line {
+    stroke: #dadadd;
+}
