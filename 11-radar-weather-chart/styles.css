@@ -73,7 +73,11 @@ body {
     stroke-width: 2px;
 }
 
+.cloud-dot,
+.precipitation-dot {
+    opacity: 0.4;
+}
 .cloud-dot {
     fill: #c8d6e5;
-    opacity: 0.6;
+    opacity: 0.4;
 }
