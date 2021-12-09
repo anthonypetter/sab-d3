@@ -7,6 +7,10 @@
     --background-color: #f8f9fa;
 }
 
+/* Use with caution or you'll have a messy looking chart on your hands! */
+svg {
+    overflow: visible;
+}
 
 body {
     display: flex;
@@ -55,6 +59,17 @@ body {
 
 .tick-label-background {
     fill: var(--background-color);
+}
+
+.annotation-line {
+    stroke: #34495e;
+    opacity: 0.4;
+}
+
+.annotation-text {
+    fill: #34495e;
+    font-size: 0.7em;
+    dominant-baseline: middle;
 }
 
 .freezing-circle {
