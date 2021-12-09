@@ -264,8 +264,65 @@ async function drawChart() {
   });
 
   // 7. Set up interactions
+  const listenerCircle = bounds.append("circle")
+    .attr("class", "listener-circle")
+    .attr("r", dimensions.width/2)
+    .on("mousemove", onMouseMove)
+    .on("mouseleave", onMouseLeave);
 
+  const tooltip = d3.select("#tooltip");
+  const tooltipLine = bounds.append("path")
+    .attr("class", "tooltip-line");
 
+  function onMouseMove(e) {
+    const [x, y] = d3.pointer(e);
+    let angle = getAngleFromCoordinates(x, y) + Math.PI / 2;
+
+    /**
+     * To keep our angles positive, we'll want to rotate any negative angles
+     * around our circle by one full turn, so they fit on our angleScale.
+     */
+    if (angle < 0) angle = (Math.PI * 2) + angle;
+
+    const tooltipArcGenerator = d3.arc()
+      .innerRadius(0)
+      .outerRadius(dimensions.boundedRadius * 1.6)
+      .startAngle(angle - 0.015)
+      .endAngle(angle + 0.015);
+
+    tooltipLine.attr("d", tooltipArcGenerator())
+        .style("opacity", 1);
+
+    // "o" for "outer".
+    const [oX, oY] = getCoordinatesForAngle(angle, 1.6);
+    /**
+     * Do some slick re-positioning based on the position we are around the
+     * circle. There's some real mental gymnastics required with combining, with
+     * calc(), px and % values. Then, it's doubly strange when you got to deal
+     * with Y coordinates being backwards (from the top left corner being the
+     * origin in our browsers).
+     */
+    tooltip.style("opacity", 1)
+      .style("transform", `translate(calc(${
+        oX < -50 ? "40px - 100" : // To the left? Set X 40px left of right edge
+          oX > 50 ? "-40px + 0" : // To the right? Set X 40px right of left edge
+            "-50" // Center
+      }% + ${
+        oX + dimensions.margin.top + dimensions.boundedRadius
+      }px), calc(${
+        oY < -50 ? "40px - 100" : // Up? Set Y 40px higher from bottom edge
+          oY > 50 ? "-40px + 0" : // Down? Set Y 40px lower from top edge
+            "-50" // Center
+      }% + ${
+        oY + dimensions.margin.top + dimensions.boundedRadius
+      }px))`);
+  }
+
+  function onMouseLeave() {
+    tooltipLine.style("opacity", 0);
+    tooltip.style("opacity", 0);
+
+  }
 
   // Helper functions
 
@@ -295,6 +352,10 @@ async function drawChart() {
   }
   function getYFromDataPoint (d, offset = 1.4) {
     return getCoordinatesFromDataPoint(d, offset)[1];
+  }
+
+  function getAngleFromCoordinates(x, y) {
+    return Math.atan2(y, x); // Yes, y and x are flipped.
   }
 
   function drawAnnotation(angle, offset, text) {
