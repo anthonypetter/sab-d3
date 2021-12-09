@@ -82,8 +82,8 @@ async function drawChart() {
   // 4. Create scales
 
   const angleScale = d3.scaleTime()
-      .domain(d3.extent(dataset, dateAccessor))
-      .range([0, Math.PI * 2]); // In radians.
+    .domain(d3.extent(dataset, dateAccessor))
+    .range([0, Math.PI * 2]); // In radians.
 
   const radiusScale = d3.scaleLinear()
     .domain(d3.extent([ // Min and Max temps - for a full range.
@@ -93,6 +93,10 @@ async function drawChart() {
     .range([0, dimensions.boundedRadius])
     .nice();
 
+  // Using the square root scale to correctly size a two dimensional chart.
+  const cloudRadiusScale = d3.scaleSqrt()
+    .domain(d3.extent(dataset, cloudAccessor))
+    .range([1, 10]);
 
   // 5. Draw peripherals
   const peripherals = bounds.append("g");
@@ -195,6 +199,16 @@ async function drawChart() {
       .attr("y1", d => getYFromDataPoint(d, uvOffset))
       .attr("y2", d => getYFromDataPoint(d, uvOffset + 0.1));
 
+  // Cloud cover
+  const cloudGroup = bounds.append("g");
+  const cloudOffset = 1.27;
+  const cloudDots = cloudGroup.selectAll("circle")
+    .data(dataset)
+    .join("circle")
+      .attr("class", "cloud-dot")
+      .attr("cx", d => getXFromDataPoint(d, cloudOffset))
+      .attr("cy", d => getYFromDataPoint(d, cloudOffset))
+      .attr("r", d => cloudRadiusScale(cloudAccessor(d)));
 
   // 7. Set up interactions
 

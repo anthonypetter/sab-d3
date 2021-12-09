@@ -72,3 +72,8 @@ body {
     stroke: #feca57;
     stroke-width: 2px;
 }
+
+.cloud-dot {
+    fill: #c8d6e5;
+    opacity: 0.6;
+}
