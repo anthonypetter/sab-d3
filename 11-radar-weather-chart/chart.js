@@ -106,6 +106,13 @@ async function drawChart() {
     .domain(precipitationTypes)
     .range(["#54a0ff", "#636e72", "#b2bec3"]);
 
+  const temperatureColorScale = d3.scaleSequential()
+    .domain(d3.extent([
+      ...dataset.map(temperatureMinAccessor),
+      ...dataset.map(temperatureMaxAccessor),
+    ]))
+    .interpolator(gradientColorScale);
+
   // 5. Draw peripherals
   const peripherals = bounds.append("g");
 
@@ -316,6 +323,39 @@ async function drawChart() {
       }% + ${
         oY + dimensions.margin.top + dimensions.boundedRadius
       }px))`);
+
+    // Hey, it's our friend invert()! Doing great work as always, buddy!
+    const date = angleScale.invert(angle);
+    const dateString = d3.timeFormat("%Y-%m-%d")(date);
+    const dataPoint = dataset.filter(d => d.date === dateString)[0];
+
+    if (!dataPoint) return; // Just in case we mess up.
+
+    // Populate the elements in the tooltip.
+    tooltip.select("#tooltip-date")
+        .text(d3.timeFormat("%B %-d")(date));
+    tooltip.select("#tooltip-temperature-min")
+        .style("color", temperatureColorScale(
+          temperatureMinAccessor(dataPoint),
+        ))
+        .html(`${d3.format(".1f")(temperatureMinAccessor(dataPoint))}°F`);
+    tooltip.select("#tooltip-temperature-max")
+        .style("color", temperatureColorScale(
+          temperatureMaxAccessor(dataPoint),
+        ))
+        .html(`${d3.format(".1f")(temperatureMaxAccessor(dataPoint))}°F`);
+    tooltip.select("#tooltip-uv")
+        .text(uvAccessor(dataPoint));
+    tooltip.select("#tooltip-cloud")
+        .text(cloudAccessor(dataPoint));
+    tooltip.select("#tooltip-precipitation")
+        .text(d3.format(".0%")(precipitationProbabilityAccessor(dataPoint)));
+    tooltip.select("#tooltip-precipitation-type")
+        .text(precipitationTypeAccessor(dataPoint));
+    tooltip.select(".tooltip-precipitation-type")
+        .style("color", precipitationTypeAccessor(dataPoint)
+          ? precipitationTypeColorScale(precipitationTypeAccessor(dataPoint))
+          : "#dadadd");
   }
 
   function onMouseLeave() {
