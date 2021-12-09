@@ -107,6 +107,11 @@ async function drawScatter() {
    * being the depth of autumn.
    * I then used an online tool to get me the middle point in the gradient
    * between Autumn and Winter and named it "New Years".
+   *
+   * Note to self. There might be something in using d3.scaleSequential( based
+   * off a info box near the very end of Chapter 11. If you find yourself
+   * defining custom domains like this take a look into it. I'm too tired to try
+   * refactoring it right now.
    */
   const colorScale = d3.scaleLinear()
     .domain([
