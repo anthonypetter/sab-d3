@@ -64,3 +64,9 @@ svg text {
 .source a {
     color: inherit;
 }
+
+.category-path {
+    fill: none;
+    stroke: white;
+    /* opacity: 0.2; */ /* Turn on to see how they're built. */
+}

@@ -1,5 +1,8 @@
 async function drawChart() {
 
+  const LINE_LINK_LENGTH = 6;
+
+
   // 1. Access data
 
   const dataset = await d3.json("./../resources/education.json");
@@ -93,6 +96,7 @@ async function drawChart() {
     },
     boundedWidth: 0,
     boundedHeight: 0,
+    pathHeight: 50,
   };
   dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
   dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
@@ -108,9 +112,60 @@ async function drawChart() {
       .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`);
 
   // 4. Create scales
+  const xScale = d3.scaleLinear()
+    .domain([0, 1])
+    .range([0, dimensions.boundedWidth])
+    .clamp(true); // Makes it so that it is not possible to go beyond the range.
+
+  /**
+   * Here we define separate Y scales. This can allow us to dynamically size
+   * our paths to grow when new ses or educations are added. Pretty cool.
+   * Remember, this is Y axis. So, things are flipped around, as per usual.
+   */
+  const startYScale = d3.scaleLinear()
+    .domain([sesIds.length, -1])
+    .range([0, dimensions.boundedHeight]);
+  const endYScale = d3.scaleLinear()
+    .domain([educationIds.length, -1])
+    .range([0, dimensions.boundedHeight]);
 
 
   // 5. Draw data
+  /**
+   * First three stops on the X scale (0, 1, 2) we follow the startYScale.
+   * Beyond that (3, 4, 5) we follow the endYScale.
+   * Using the monotoneX curve style it maintains, on the X axis, that every
+   * point is met by the line correctly. We'd use Y if the chart was vertical.
+   * See the docs for examples.
+   */
+  const linkLineGenerator = d3.line()
+    .x((_d, i) => i * (dimensions.boundedWidth / (LINE_LINK_LENGTH - 1)))
+    .y((d, i) => i <= 2 ? startYScale(d[0]) : endYScale(d[1]))
+    .curve(d3.curveMonotoneX);
+
+  /**
+   * Automatically generate the arrays needed to populate the line generator.
+   * 3 ses leading to 6 different education outcomes. That's 18 different
+   * arrays.
+   * I suppose it's a bit weird to generate entire arrays instead of just
+   * writing 18 variations in a single array. But we're keeping it simple and
+   * the line generator needs to have a dataset to base off of.
+   */
+  const linkOptions = d3.merge(
+    sesIds.map(startId => (
+      educationIds.map(endId => (
+        new Array(LINE_LINK_LENGTH).fill([startId, endId])
+      ))
+    )),
+  );
+
+  const linksGroup = bounds.append("g");
+  const links = linksGroup.selectAll(".category-path")
+    .data(linkOptions)
+    .join("path")
+        .attr("class", "category-path")
+        .attr("d", linkLineGenerator)
+        .attr("stroke-width", dimensions.pathHeight);
 
 
   // 6. Draw peripherals
