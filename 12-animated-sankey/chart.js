@@ -127,13 +127,17 @@ async function drawChart() {
     .range([0, dimensions.boundedHeight]);
 
   const yTransitionProgressScale = d3.scaleLinear()
-    .domain([0.45, 0.55]) // x progress. These numbers are hand-chosen.
-    .range([0, 1])        // y progress. Just want a fraction.
-    .clamp(true);         // Really hilarious what happens when set to false.
+    .domain([ // x progress. From the mid-point we have a small domain to move.
+      0.5 - 0.5 / LINE_LINK_LENGTH,
+      0.5 + 0.5 / LINE_LINK_LENGTH,
+    ])
+    .range([0, 1])  // y progress. Just want a fraction.
+    .clamp(true);   // Really hilarious what happens when set to false.
 
 
   // 5. Draw data
   /**
+   * (Comments are assuming LINE_LINK_LENGTH is 6...)
    * First three stops on the X scale (0, 1, 2) we follow the startYScale.
    * Beyond that (3, 4, 5) we follow the endYScale.
    * Using the monotoneX curve style it maintains, on the X axis, that every
@@ -142,7 +146,7 @@ async function drawChart() {
    */
   const linkLineGenerator = d3.line()
     .x((_d, i) => i * (dimensions.boundedWidth / (LINE_LINK_LENGTH - 1)))
-    .y((d, i) => i <= 2 ? startYScale(d[0]) : endYScale(d[1]))
+    .y((d, i) => i < LINE_LINK_LENGTH / 2 ? startYScale(d[0]) : endYScale(d[1]))
     .curve(d3.curveMonotoneX);
 
   /**
