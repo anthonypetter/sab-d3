@@ -53,7 +53,7 @@ async function drawChart() {
   });
   console.table(stackedProbabilities);
 
-  function generatePerson() {
+  function generatePerson(elapsed) {
     const sex = getRandomValue(sexIds);
     const ses = getRandomValue(sesIds);
     const statusKey = getStatusKey({
@@ -71,12 +71,8 @@ async function drawChart() {
     const probabilities = stackedProbabilities[statusKey];
     const education = d3.bisect(probabilities, Math.random());
 
-    return { sex, ses, education };
+    return { sex, ses, education, startTime: elapsed };
   }
-
-  console.log(generatePerson());
-  console.log(generatePerson());
-  console.log(generatePerson());
 
 
   // 2. Create chart dimensions
@@ -211,7 +207,40 @@ async function drawChart() {
       .attr("points", trianglePoints)
       .attr("transform", d => `translate(5, ${endYScale(d) + 20})`);
 
+
   // 7. Set up interactions
+  let people = [];
+  const markersGroup = bounds.append("g")
+    .attr("class", "markers-group");
+
+  function updateMarkers(elapsed) {
+
+    people = [
+      ...people,
+      generatePerson(elapsed),
+    ];
+    console.log(people.length);
+
+    const females = markersGroup.selectAll(".marker-triangle")
+      .data(people.filter(d => sexAccessor(d) == 0));
+    females.enter().append("polygon")
+      .attr("class", "marker marker-triangle")
+      .attr("points", trianglePoints);
+
+    const males = markersGroup.selectAll(".marker-circle")
+      .data(people.filter(d => sexAccessor(d) == 1));
+    males.enter().append("circle")
+      .attr("class", "marker marker-circle")
+      .attr("r", 5.5);
+
+    const markers = d3.selectAll(".marker");
+    markers.style("transform", d => {
+      const x = elapsed - d.startTime;
+      const y = startYScale(sesAccessor(d));
+      return `translate(${x}px, ${y}px)`;
+    });
+  }
+  d3.timer(updateMarkers);
 
 }
 drawChart();
