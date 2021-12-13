@@ -1,6 +1,7 @@
 async function drawChart() {
 
   const LINE_LINK_LENGTH = 6;
+  const MAX_PEOPLE = 10000;
 
 
   // 1. Access data
@@ -125,6 +126,11 @@ async function drawChart() {
     .domain([educationIds.length, -1])
     .range([0, dimensions.boundedHeight]);
 
+  const yTransitionProgressScale = d3.scaleLinear()
+    .domain([0.45, 0.55]) // x progress. These numbers are hand-chosen.
+    .range([0, 1])        // y progress. Just want a fraction.
+    .clamp(true);         // Really hilarious what happens when set to false.
+
 
   // 5. Draw data
   /**
@@ -209,16 +215,20 @@ async function drawChart() {
 
 
   // 7. Set up interactions
+
   let people = [];
   const markersGroup = bounds.append("g")
     .attr("class", "markers-group");
 
   function updateMarkers(elapsed) {
+    const xProgressAccessor = d => (elapsed - d.startTime) / 5000;
 
-    people = [
-      ...people,
-      generatePerson(elapsed),
-    ];
+    if (people.length < MAX_PEOPLE) {
+      people = [
+        ...people,
+        generatePerson(elapsed),
+      ];
+    }
     console.log(people.length);
 
     const females = markersGroup.selectAll(".marker-triangle")
@@ -235,8 +245,12 @@ async function drawChart() {
 
     const markers = d3.selectAll(".marker");
     markers.style("transform", d => {
-      const x = elapsed - d.startTime;
-      const y = startYScale(sesAccessor(d));
+      const x = xScale(xProgressAccessor(d));
+      const yStart = startYScale(sesAccessor(d)); // Where it starts
+      const yEnd = endYScale(educationAccessor(d)); // Where it ends up
+      const yChange = yEnd - yStart;  // The y distance it must cover
+      const yProgress = yTransitionProgressScale(xProgressAccessor(d));
+      const y = yStart + yChange * yProgress;
       return `translate(${x}px, ${y}px)`;
     });
   }
