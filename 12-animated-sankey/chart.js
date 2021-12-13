@@ -293,6 +293,8 @@ async function drawChart() {
   let people = [];
   const markersGroup = bounds.append("g")
     .attr("class", "markers-group");
+  const endingBarGroup = bounds.append("g")
+    .attr("transform", `translate(${dimensions.boundedWidth}, 0)`);
 
   function updateMarkers(elapsed) {
     const xProgressAccessor = d => (elapsed - d.startTime) / 5000;
@@ -300,7 +302,7 @@ async function drawChart() {
     if (people.length < MAX_PEOPLE) {
       people = [
         ...people,
-        generatePerson(elapsed),
+        ...d3.range(2).map(() => generatePerson(elapsed)),
       ];
     }
 
@@ -403,12 +405,8 @@ async function drawChart() {
     // For help, prints out every 300 people generated.
     if (currentPersonId % 300 === 0) {
       console.table(endingPercentages);
-
     }
 
-    // We want to put this here, now, to be above the icons.
-    const endingBarGroup = bounds.append("g")
-      .attr("transform", `translate(${dimensions.boundedWidth}, 0)`);
 
     endingBarGroup.selectAll(".ending-bar")
       .data(endingPercentages)
