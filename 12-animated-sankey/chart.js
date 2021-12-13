@@ -234,7 +234,7 @@ async function drawChart() {
       .attr("class", "ending-marker male-marker")
       .attr("r", 5.5)
       .attr("cx", 5)
-      .attr("cy", d => endYScale(d) + 5);
+      .attr("cy", d => endYScale(d) + 20);
 
   const trianglePoints = ["-7, 6", "0, -6", "7, 6"].join(" ");
   const femaleMarkers = endingLabelsGroup.selectAll(".female-marker")
@@ -242,7 +242,50 @@ async function drawChart() {
     .join("polygon")
       .attr("class", "ending-marker female-marker")
       .attr("points", trianglePoints)
-      .attr("transform", d => `translate(5, ${endYScale(d) + 20})`);
+      .attr("transform", d => `translate(5, ${endYScale(d) + 5})`);
+
+  const legendGroup = bounds.append("g")
+      .attr("class", "legend")
+      .attr("transform",  `translate(${dimensions.boundedWidth}, 5)`);
+
+  const femaleLegend = legendGroup.append("g")
+      .attr("transform", `translate(${
+        - dimensions.endsBarWidth * 1.5
+        + dimensions.endingBarPadding
+        + 1
+      }, 0)`);
+  femaleLegend.append("polygon")
+      .attr("points", trianglePoints)
+      .attr("transform", "translate(-7, 0)");
+  femaleLegend.append("text")
+      .attr("class", "legend-text-left")
+      .text("Female")
+      .attr("x", -20);
+  femaleLegend.append("line")
+      .attr("class", "legend-line")
+      .attr("x1", -dimensions.endsBarWidth / 2 + 1)
+      .attr("x2", -dimensions.endsBarWidth / 2 + 1)
+      .attr("y1", 12)
+      .attr("y2", 37);
+
+  const maleLegend = legendGroup.append("g")
+      .attr("transform", `translate(${
+        - dimensions.endsBarWidth / 2 - 4
+      }, 0)`);
+  maleLegend.append("circle")
+      .attr("r", 5.5)
+      .attr("transform", "translate(5, 0)");
+  maleLegend.append("text")
+      .attr("class", "legend-text-right")
+      .text("Male")
+      .attr("x", 15)
+      .attr("y", 0);
+  maleLegend.append("line")
+      .attr("class", "legend-line")
+      .attr("x1", dimensions.endsBarWidth / 2 - 3)
+      .attr("x2", dimensions.endsBarWidth / 2 - 3)
+      .attr("y1", 12)
+      .attr("y2", 37);
 
 
   // 7. Set up interactions
@@ -371,9 +414,10 @@ async function drawChart() {
       .data(endingPercentages)
       .join("rect")
         .attr("class", "ending-bar")
-        .attr("x", d => -dimensions.endsBarWidth * (d.sexId + 1)
-          - (d.sexId * dimensions.endingBarPadding),
-        )
+        .attr("x", d => -dimensions.endsBarWidth * 2 + (
+          d.sexId * dimensions.endsBarWidth
+          + (d.sexId - 1) * dimensions.endingBarPadding
+        ))
         .attr("width", dimensions.endsBarWidth)
         .attr("y", d => endYScale(d.endingId)
           - dimensions.pathHeight / 2
@@ -387,6 +431,23 @@ async function drawChart() {
           ? colorScale(d.sesId)
           : "#dadadd",  // When empty.
         );
+
+    endingLabelsGroup.selectAll(".ending-value")
+      .data(endingPercentages)
+      .join("text")
+        .attr("class", "ending-value")
+        .attr("x", d => (d.sesId) * 33 + 47)
+        .attr("y", d => endYScale(d.endingId)
+          - dimensions.pathHeight / 2
+          + 14 * d.sexId
+          + 35,
+        )
+        .attr("fill", d => d.countInBar
+          ? colorScale(d.sesId)
+          : "#dadadd",
+        )
+        .text(d => d.count);
+
   }
   d3.timer(updateMarkers);
 
