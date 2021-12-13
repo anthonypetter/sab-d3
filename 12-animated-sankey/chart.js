@@ -72,7 +72,13 @@ async function drawChart() {
     const probabilities = stackedProbabilities[statusKey];
     const education = d3.bisect(probabilities, Math.random());
 
-    return { sex, ses, education, startTime: elapsed };
+    return {
+      sex,
+      ses,
+      education,
+      startTime: elapsed,
+      yJitter: getRandomNumberInRange(-15, 15),
+    };
   }
 
 
@@ -233,19 +239,22 @@ async function drawChart() {
         generatePerson(elapsed),
       ];
     }
-    console.log(people.length);
 
     const females = markersGroup.selectAll(".marker-triangle")
-      .data(people.filter(d => sexAccessor(d) == 0));
+      .data(people.filter(d => xProgressAccessor(d) < 1 && sexAccessor(d) == 0));
     females.enter().append("polygon")
       .attr("class", "marker marker-triangle")
-      .attr("points", trianglePoints);
+      .attr("points", trianglePoints)
+      .style("opacity", 0);
+    females.exit().remove();
 
     const males = markersGroup.selectAll(".marker-circle")
-      .data(people.filter(d => sexAccessor(d) == 1));
+      .data(people.filter(d => xProgressAccessor(d) < 1 && sexAccessor(d) == 1));
     males.enter().append("circle")
       .attr("class", "marker marker-circle")
-      .attr("r", 5.5);
+      .attr("r", 5.5)
+      .style("opacity", 0);
+    males.exit().remove();
 
     const markers = d3.selectAll(".marker");
     markers.style("transform", d => {
@@ -254,9 +263,13 @@ async function drawChart() {
       const yEnd = endYScale(educationAccessor(d)); // Where it ends up
       const yChange = yEnd - yStart;  // The y distance it must cover
       const yProgress = yTransitionProgressScale(xProgressAccessor(d));
-      const y = yStart + yChange * yProgress;
+      const y = yStart + yChange * yProgress + d.yJitter;
       return `translate(${x}px, ${y}px)`;
-    });
+    })
+    .transition().duration(100) // Transparent until atleast 10 px traveled.
+      .style("opacity", d => 10 < xScale(xProgressAccessor(d)) &&
+        xScale(xProgressAccessor(d)) < dimensions.boundedWidth - 30 ? 1 : 0,
+      );
   }
   d3.timer(updateMarkers);
 
