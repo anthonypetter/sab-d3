@@ -93,3 +93,7 @@ svg text {
     /* Kills render performance in MS Edge. */
     /* mix-blend-mode: multiply; */
 }
+
+.ending-bar {
+    transition: all 0.3s ease-out;
+}

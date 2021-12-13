@@ -106,6 +106,7 @@ async function drawChart() {
     boundedHeight: 0,
     pathHeight: 50,
     endsBarWidth: 15,
+    endingBarPadding: 3,
   };
   dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
   dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
@@ -209,7 +210,7 @@ async function drawChart() {
       .attr("y", startYScale(sesIds[sesIds.length - 1]) - 50)
       .text("Status");  // No linebreaks in SVG :(
 
-  const startinBars = startingLabelsGroup.selectAll(".start-bar")
+  const startingBars = startingLabelsGroup.selectAll(".start-bar")
     .data(sesIds)
     .join("rect")
       .attr("x", 20)
@@ -295,6 +296,97 @@ async function drawChart() {
       .style("opacity", d => 10 < xScale(xProgressAccessor(d)) &&
         xScale(xProgressAccessor(d)) < dimensions.boundedWidth - 30 ? 1 : 0,
       );
+
+    /**
+     * Here we calculate all the people who've completed their journey and fit
+     * inside a particular education bucket.
+     */
+    const endingGroups = educationIds.map((endId, i) => (
+      people.filter(d => (
+        xProgressAccessor(d) >= 1
+        && educationAccessor(d) === endId
+      ))
+    ));
+
+    /**
+     * This is quite a doozy for an expression but considering what we want to
+     * accomplish this actually just about works as you expect it to.
+     * With 3 ses, 2 sexes, and 6 education outcomes there are 3 * 2 * 6 results
+     * possible = 36.
+     * So, what we're doing is creating 36 different objects that contain the
+     * basic key values (education ID, ses ID, sex ID) and then doing some basic
+     * math to calculate the count, the count in the bar (the ses combined in
+     * one sex), the percentages of people with higher SES, and percentage that
+     * the specific SES (for this sex and education outcome combination) exist
+     * at.
+     * You really need to consider how we've split up our data, and what data
+     * is displayed where and when. We break by education outcome. Then by sex.
+     * Then by SES (and we want to show the ratios, as that's what our primary
+     * interest is!).
+     * By the way. It's maybe not so obvious why we want a "percentage above"
+     * metric. Well. See how we end up using it when drawing the bar graphs.
+     */
+    const endingPercentages = d3.merge(
+      endingGroups.map((peopleWithSameEnding, endingId) => (  // Education
+        d3.merge(
+          sexIds.map(sexId => (                               // Sex
+            sesIds.map(sesId => {                             // SES
+              const peopleInBar = peopleWithSameEnding.filter(d => (
+                sexAccessor(d) === sexId
+              ));
+              const countInBar = peopleInBar.length;
+              const peopleInBarWithSameStart = peopleInBar.filter(d => (
+                sesAccessor(d) === sesId
+              ));
+              const count = peopleInBarWithSameStart.length;
+              const numberOfPeopleAbove = peopleInBar.filter(d => (
+                sesAccessor(d) > sesId
+              )).length;
+
+              return {
+                endingId,
+                sesId,
+                sexId,
+                count,
+                countInBar,
+                percentAbove: numberOfPeopleAbove / (peopleInBar.length || 1),
+                percent: count / (countInBar || 1),
+              };
+            })
+          )),
+        )
+      )),
+    );
+    // For help, prints out every 300 people generated.
+    if (currentPersonId % 300 === 0) {
+      console.table(endingPercentages);
+
+    }
+
+    // We want to put this here, now, to be above the icons.
+    const endingBarGroup = bounds.append("g")
+      .attr("transform", `translate(${dimensions.boundedWidth}, 0)`);
+
+    endingBarGroup.selectAll(".ending-bar")
+      .data(endingPercentages)
+      .join("rect")
+        .attr("class", "ending-bar")
+        .attr("x", d => -dimensions.endsBarWidth * (d.sexId + 1)
+          - (d.sexId * dimensions.endingBarPadding),
+        )
+        .attr("width", dimensions.endsBarWidth)
+        .attr("y", d => endYScale(d.endingId)
+          - dimensions.pathHeight / 2
+          + dimensions.pathHeight * d.percentAbove,
+        )
+        .attr("height", d => d.countInBar
+          ? dimensions.pathHeight * d.percent
+          : dimensions.pathHeight, // When empty.
+        )
+        .attr("fill", d => d.countInBar
+          ? colorScale(d.sesId)
+          : "#dadadd",  // When empty.
+        );
   }
   d3.timer(updateMarkers);
 
