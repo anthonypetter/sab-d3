@@ -169,7 +169,47 @@ async function drawChart() {
 
 
   // 6. Draw peripherals
+  const startingLabelsGroup = bounds.append("g")
+      .style("transform", "translateX(-20px)");
+  const startingLavels = startingLabelsGroup.selectAll(".start-label")
+    .data(sesIds)
+    .join("text")
+      .attr("class", "label start-label")
+      .attr("y", (_d, i) => startYScale(i))
+      .text((_d, i) => sentenceCase(sesNames[i]));
+  const startLabel = startingLabelsGroup.append("text")
+      .attr("class", "start-title")
+      .attr("y", startYScale(sesIds[sesIds.length - 1]) - 65)
+      .text("Socioeconomic");
+  const startLabelLineTwo = startingLabelsGroup.append("text")
+      .attr("class", "start-title")
+      .attr("y", startYScale(sesIds[sesIds.length - 1]) - 50)
+      .text("Status");  // No linebreaks in SVG :(
 
+  const endingLabelsGroup = bounds.append("g")
+      .style("transform", `translateX(${dimensions.boundedWidth + 20}px)`);
+  const endingLabels = endingLabelsGroup.selectAll(".end-label")
+    .data(educationNames)
+    .join("text")
+      .attr("class", "label end-label")
+      .attr("y", (_d, i) => endYScale(i) - 15)
+      .text(d => d);
+
+  const maleMarkers = endingLabelsGroup.selectAll(".male-marker")
+    .data(educationIds)
+    .join("circle")
+      .attr("class", "ending-marker male-marker")
+      .attr("r", 5.5)
+      .attr("cx", 5)
+      .attr("cy", d => endYScale(d) + 5);
+
+  const trianglePoints = ["-7, 6", "0, -6", "7, 6"].join(" ");
+  const femaleMarkers = endingLabelsGroup.selectAll(".female-marker")
+    .data(educationIds)
+    .join("polygon")
+      .attr("class", "ending-marker female-marker")
+      .attr("points", trianglePoints)
+      .attr("transform", d => `translate(5, ${endYScale(d) + 20})`);
 
   // 7. Set up interactions
 

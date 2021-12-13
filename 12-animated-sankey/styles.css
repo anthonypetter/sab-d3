@@ -70,3 +70,22 @@ svg text {
     stroke: white;
     /* opacity: 0.2; */ /* Turn on to see how they're built. */
 }
+
+.label {
+    font-weight: 600;
+    dominant-baseline: middle;
+}
+.ending-marker {
+    opacity: 0.6;
+}
+
+.start-label {
+    text-anchor: end;
+    dominate-baseline: middle;
+}
+.start-title {
+    text-anchor: end;
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+
