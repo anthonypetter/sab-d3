@@ -89,3 +89,7 @@ svg text {
     opacity: 0.6;
 }
 
+.marker {
+    /* Kills render performance in MS Edge. */
+    /* mix-blend-mode: multiply; */
+}

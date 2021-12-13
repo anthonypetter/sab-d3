@@ -54,6 +54,7 @@ async function drawChart() {
   });
   console.table(stackedProbabilities);
 
+  let currentPersonId = 0;
   function generatePerson(elapsed) {
     const sex = getRandomValue(sexIds);
     const ses = getRandomValue(sesIds);
@@ -72,7 +73,11 @@ async function drawChart() {
     const probabilities = stackedProbabilities[statusKey];
     const education = d3.bisect(probabilities, Math.random());
 
+    // Keep people unique so we don't recycle elements and mess up fade-in.
+    ++currentPersonId;
+
     return {
+      id: currentPersonId,
       sex,
       ses,
       education,
@@ -100,6 +105,7 @@ async function drawChart() {
     boundedWidth: 0,
     boundedHeight: 0,
     pathHeight: 50,
+    endsBarWidth: 15,
   };
   dimensions.boundedWidth = dimensions.width - dimensions.margin.left - dimensions.margin.right;
   dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
@@ -139,6 +145,11 @@ async function drawChart() {
     ])
     .range([0, 1])  // y progress. Just want a fraction.
     .clamp(true);   // Really hilarious what happens when set to false.
+
+  const colorScale = d3.scaleLinear()
+    .domain(d3.extent(sesIds))
+    .range(["#12cbc4", "#b53471"])
+    .interpolate(d3.interpolateHcl);  // HCL is nicer here.
 
 
   // 5. Draw data
@@ -198,6 +209,15 @@ async function drawChart() {
       .attr("y", startYScale(sesIds[sesIds.length - 1]) - 50)
       .text("Status");  // No linebreaks in SVG :(
 
+  const startinBars = startingLabelsGroup.selectAll(".start-bar")
+    .data(sesIds)
+    .join("rect")
+      .attr("x", 20)
+      .attr("y", d => startYScale(d) - dimensions.pathHeight / 2)
+      .attr("width", dimensions.endsBarWidth)
+      .attr("height", dimensions.pathHeight)
+      .attr("fill", colorScale);
+
   const endingLabelsGroup = bounds.append("g")
       .style("transform", `translateX(${dimensions.boundedWidth + 20}px)`);
   const endingLabels = endingLabelsGroup.selectAll(".end-label")
@@ -241,7 +261,9 @@ async function drawChart() {
     }
 
     const females = markersGroup.selectAll(".marker-triangle")
-      .data(people.filter(d => xProgressAccessor(d) < 1 && sexAccessor(d) == 0));
+      .data(
+        people.filter(d => xProgressAccessor(d) < 1 && sexAccessor(d) == 0),
+        d => d.id); // Key accessor.
     females.enter().append("polygon")
       .attr("class", "marker marker-triangle")
       .attr("points", trianglePoints)
@@ -249,7 +271,9 @@ async function drawChart() {
     females.exit().remove();
 
     const males = markersGroup.selectAll(".marker-circle")
-      .data(people.filter(d => xProgressAccessor(d) < 1 && sexAccessor(d) == 1));
+      .data(
+        people.filter(d => xProgressAccessor(d) < 1 && sexAccessor(d) == 1),
+        d => d.id); // Key accessor.
     males.enter().append("circle")
       .attr("class", "marker marker-circle")
       .attr("r", 5.5)
@@ -266,6 +290,7 @@ async function drawChart() {
       const y = yStart + yChange * yProgress + d.yJitter;
       return `translate(${x}px, ${y}px)`;
     })
+    .attr("fill", d => colorScale(sesAccessor(d)))
     .transition().duration(100) // Transparent until atleast 10 px traveled.
       .style("opacity", d => 10 < xScale(xProgressAccessor(d)) &&
         xScale(xProgressAccessor(d)) < dimensions.boundedWidth - 30 ? 1 : 0,
