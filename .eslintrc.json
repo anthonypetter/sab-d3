@@ -3,11 +3,20 @@
     "browser": true,
     "es2021": true
   },
-  "extends": "eslint:recommended",
+  "extends": [
+    "plugin:react/recommended",
+    "eslint:recommended"
+  ],
   "parserOptions": {
-    "ecmaVersion": "latest",
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 13,
     "sourceType": "module"
   },
+  "plugins": [
+    "react"
+  ],
   "rules": {
     "indent": [
       "error",
