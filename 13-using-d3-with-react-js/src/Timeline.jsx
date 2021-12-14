@@ -10,8 +10,14 @@ import { useChartDimensions, accessorPropsType } from "./Chart/utils";
 const formatDate = d3.timeFormat("%-b %-d");
 
 const Timeline = ({ data, xAccessor, yAccessor, label }) => {
+  const [ref, dimensions] = useChartDimensions();
+  // console.table(dimensions);
+
   return (
-    <div className="Timeline">
+    <div className="Timeline" ref={ref}>
+      <Chart dimensions={dimensions}>
+
+      </Chart>
     </div>
   );
 };

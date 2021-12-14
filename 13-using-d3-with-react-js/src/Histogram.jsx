@@ -13,6 +13,7 @@ const Histogram = ({ data, xAccessor, label }) => {
 
   return (
     <div className="Histogram placeholder">
+      Histogram
     </div>
   );
 };

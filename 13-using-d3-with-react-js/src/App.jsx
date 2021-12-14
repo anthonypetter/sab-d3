@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { getTimelineData, getScatterData } from "./utils/dummyData";
 
-// import Timeline from "./Timeline";
-// import ScatterPlot from "./ScatterPlot";
-// import Histogram from "./Histogram";
-import Timeline from "./completed/Timeline";
-import ScatterPlot from "./completed/ScatterPlot";
-import Histogram from "./completed/Histogram";
+import Timeline from "./Timeline";
+import ScatterPlot from "./ScatterPlot";
+import Histogram from "./Histogram";
+// import Timeline from "./completed/Timeline";
+// import ScatterPlot from "./completed/ScatterPlot";
+// import Histogram from "./completed/Histogram";
 
 import "./styles.css";
 

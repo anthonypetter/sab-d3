@@ -11,6 +11,7 @@ const ScatterPlot = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
 
   return (
     <div className="ScatterPlot placeholder">
+      ScatterPlot
     </div>
   );
 };
