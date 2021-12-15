@@ -22,7 +22,7 @@ const Timeline = ({ data, xAccessor, yAccessor, label }) => {
    * can abstract redundant code and make it easier for collaborators who are
    * less familiar with data visualization.
    */
-  const xScale = d3.scaleLinear()
+  const xScale = d3.scaleTime()
     .domain(d3.extent(data, xAccessor))
     .range([0, dimensions.boundedWidth]);
   const yScale = d3.scaleLinear()
@@ -38,6 +38,14 @@ const Timeline = ({ data, xAccessor, yAccessor, label }) => {
   return (
     <div className="Timeline" ref={ref}>
       <Chart dimensions={dimensions}>
+        <Axis
+          dimension="x"
+          scale={xScale}
+        />
+        <Axis
+          dimension="y"
+          scale={yScale}
+        />
         <Line
           data={data}
           xAccessor={xAccessorScaled}
