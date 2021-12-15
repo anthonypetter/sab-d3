@@ -3,6 +3,11 @@ import PropTypes from "prop-types";
 import * as d3 from "d3";
 import { useDimensionsContext } from "./Chart";
 
+/**
+ * The lesson provided here in this Component is to NOT do it like this. Look
+ * at Axis.jsx instead and use it for inspiration.
+ */
+
 const Axis = ({ dimension, scale, ...props }) => {
   const dimensions = useDimensionsContext();
   const axisGeneratorsByDimension = {

@@ -4,13 +4,13 @@ import * as d3 from "d3";
 
 import Chart from "./Chart/Chart";
 import Line from "./Chart/Line";
-import Axis from "./Chart/Axis-naive";
+import Axis from "./Chart/Axis";
 import { useChartDimensions, accessorPropsType } from "./Chart/utils";
 
 const formatDate = d3.timeFormat("%-b %-d");
 
 const Timeline = ({ data, xAccessor, yAccessor, label }) => {
-  const [ref, dimensions] = useChartDimensions();
+  const [ref, dimensions] = useChartDimensions({ marginBottom: 50 });
   // console.table(dimensions);
 
 
@@ -41,10 +41,13 @@ const Timeline = ({ data, xAccessor, yAccessor, label }) => {
         <Axis
           dimension="x"
           scale={xScale}
+          formatTick={formatDate}
+          label="Date"
         />
         <Axis
           dimension="y"
           scale={yScale}
+          label="Temperature"
         />
         <Line
           data={data}
