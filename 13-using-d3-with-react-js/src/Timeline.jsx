@@ -13,10 +13,38 @@ const Timeline = ({ data, xAccessor, yAccessor, label }) => {
   const [ref, dimensions] = useChartDimensions();
   // console.table(dimensions);
 
+
+  /**
+   * If you wanted to make creating scales easier, you could abstract the
+   * concept of a "scale" and add ease-of-use methods to your chart library.
+   * For example, you could make a method that takes a dimension (eg. x) and an
+   * accessor function and create a scale. A more comprehensive chart library
+   * can abstract redundant code and make it easier for collaborators who are
+   * less familiar with data visualization.
+   */
+  const xScale = d3.scaleLinear()
+    .domain(d3.extent(data, xAccessor))
+    .range([0, dimensions.boundedWidth]);
+  const yScale = d3.scaleLinear()
+    .domain(d3.extent(data, yAccessor))
+    .range([dimensions.boundedHeight, 0])
+    .nice();
+  /**
+   * Make scaled accessor functions for both axes.
+   */
+  const xAccessorScaled = d => xScale(xAccessor(d));
+  const yAccessorScaled = d => yScale(yAccessor(d));
+
   return (
     <div className="Timeline" ref={ref}>
       <Chart dimensions={dimensions}>
-
+        <Line
+          data={data}
+          xAccessor={xAccessorScaled}
+          yAccessor={yAccessorScaled}
+          // type="area"
+          // y0Accessor={dimensions.boundedHeight}
+        />
       </Chart>
     </div>
   );
