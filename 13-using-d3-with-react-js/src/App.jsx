@@ -50,7 +50,8 @@ const App = () => {
         <Histogram
           data={data.scatter}
           xAccessor={humidityAccessor}
-          label="Humidity"
+          xLabel="Humidity"
+          yLabel="Count"
         />
       </div>
     </div>

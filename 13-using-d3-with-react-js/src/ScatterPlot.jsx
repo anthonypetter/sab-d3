@@ -78,6 +78,7 @@ const ScatterPlot = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
 };
 
 ScatterPlot.propTypes = {
+  data: PropTypes.array,
   xAccessor: accessorPropsType,
   yAccessor: accessorPropsType,
   xLabel: PropTypes.string,
