@@ -1,10 +1,13 @@
 .Chart {
     overflow: visible;
+    position: relative;
 }
 
 .Chart text {
     fill: #95a5a6;
 }
+
+
 
 .Line {
     transition: all 0.3s ease-out;

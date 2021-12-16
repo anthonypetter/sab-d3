@@ -46,6 +46,7 @@ const App = () => {
           yAccessor={temperatureAccessor}
           xLabel="Humidity"
           yLabel="Temperature"
+          listener
         />
         <Histogram
           data={data.scatter}

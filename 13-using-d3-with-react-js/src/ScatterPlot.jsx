@@ -7,7 +7,7 @@ import Circles from "./Chart/Circles";
 import Axis from "./Chart/Axis";
 import { useChartDimensions, accessorPropsType } from "./Chart/utils";
 
-const ScatterPlot = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
+const ScatterPlot = ({ data, xAccessor, yAccessor, xLabel, yLabel, listener }) => {
   const [ref, dimensions] = useChartDimensions({ marginBottom: 77 });
 
   const xScale = d3.scaleLinear()
@@ -51,7 +51,7 @@ const ScatterPlot = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
 
   return (
     <div className="ScatterPlot" ref={ref}>
-      <Chart dimensions={dimensions}>
+      <Chart dimensions={dimensions} listener={listener}>
         <Axis
           dimensions={dimensions}
           dimension="x"
@@ -83,10 +83,12 @@ ScatterPlot.propTypes = {
   yAccessor: accessorPropsType,
   xLabel: PropTypes.string,
   yLabel: PropTypes.string,
+  listener: PropTypes.bool,
 };
 
 ScatterPlot.defaultProps = {
   xAccessor: d => d.x,
   yAccessor: d => d.y,
+  listener: false,
 };
 export default ScatterPlot;
