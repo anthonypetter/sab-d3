@@ -7,9 +7,16 @@
     {
       "type": "pwa-msedge",
       "request": "launch",
-      "name": "Launch Edge against localhost",
+      "name": "Launch Edge against localhost 8080",
       "url": "http://localhost:8080",
       "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "pwa-msedge",
+      "request": "launch",
+      "name": "Launch Edge against localhost 8090",
+      "url": "http://localhost:8090",
+      "webRoot": "${workspaceFolder}/13-using-d3-with-react"
     }
   ]
 }
