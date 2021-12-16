@@ -8,8 +8,9 @@ import Axis from "./Chart/Axis";
 import Gradient from "./Chart/Gradient";
 import { useChartDimensions, accessorPropsType, useUniqueId } from "./Chart/utils";
 
-// const gradientColors = ["#9980FA", "rgb(226, 222, 243)"];
+const gradientColors = ["#9980FA", "#E2DEF3"];
 const Histogram = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
+  const gradientId = useUniqueId("Histogram-gradient");
   const [ref, dimensions] = useChartDimensions({
     marginBottom: 77,
   });
@@ -44,6 +45,14 @@ const Histogram = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
   return (
     <div className="Histogram" ref={ref}>
       <Chart dimensions={dimensions}>
+        <defs>
+          <Gradient
+            id={gradientId}
+            colors={gradientColors}
+            x2="0"
+            y2="100%"
+          />
+        </defs>
         <Axis
           dimensions={dimensions}
           dimension="x"
@@ -63,6 +72,7 @@ const Histogram = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
           yAccessor={yAccessorScaled}
           widthAccessor={widthAccessorScaled}
           heightAccessor={heightAccessorScaled}
+          style={{ fill: `url(#${gradientId})` }}
         />
       </Chart>
     </div>
