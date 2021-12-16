@@ -37,7 +37,8 @@ const App = () => {
           data={data.timeline}
           xAccessor={dateAccessor}
           yAccessor={temperatureAccessor}
-          label="Temperature"
+          xLabel="Date"
+          yLabel="Temperature"
         />
         <ScatterPlot
           data={data.scatter}

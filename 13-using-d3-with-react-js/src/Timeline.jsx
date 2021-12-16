@@ -11,7 +11,7 @@ import Gradient from "./Chart/Gradient";
 const formatDate = d3.timeFormat("%-b %-d");
 const gradientColors = ["#e2def3", "#f8f9fa"];
 
-const Timeline = ({ data, xAccessor, yAccessor, label }) => {
+const Timeline = ({ data, xAccessor, yAccessor, xLabel, yLabel }) => {
   const [ref, dimensions] = useChartDimensions({ marginBottom: 50 });
   // console.table(dimensions);
 
@@ -56,12 +56,12 @@ const Timeline = ({ data, xAccessor, yAccessor, label }) => {
           dimension="x"
           scale={xScale}
           formatTick={formatDate}
-          label="Date"
+          label={xLabel}
         />
         <Axis
           dimension="y"
           scale={yScale}
-          label="Temperature"
+          label={yLabel}
         />
         <Line
           data={data}
@@ -85,7 +85,8 @@ Timeline.propTypes = {
   data: PropTypes.array,
   xAccessor: accessorPropsType,
   yAccessor: accessorPropsType,
-  label: PropTypes.string,
+  xLabel: PropTypes.string,
+  yLabel: PropTypes.string,
 };
 
 Timeline.defaultProps = {
